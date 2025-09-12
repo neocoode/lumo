@@ -177,7 +177,7 @@ coverage/
 test_driver/
 integration_test/
 
-**/**/app/build
+app/build
 
 # Firebase
 **/**/ios/build
