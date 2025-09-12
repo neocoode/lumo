@@ -178,21 +178,21 @@ test_driver/
 integration_test/
 
 # Firebase
-**/ios/build
-**/ios/firebase_app_id_file.json
-**/ios/GoogleService-Info.plist
-**/android/app/google-services.json
-**/android/app/src/main/res/values/strings.xml
+**/**/ios/build
+**/**/ios/firebase_app_id_file.json
+**/**/ios/GoogleService-Info.plist
+**/**/android/app/google-services.json
+**/**/android/app/src/main/res/values/strings.xml
 
 # Fastlane
-**/ios/fastlane/report.xml
-**/ios/fastlane/Preview.html
-**/ios/fastlane/screenshots
+**/**/ios/fastlane/report.xml
+**/**/ios/fastlane/Preview.html
+**/**/ios/fastlane/screenshots
 **/ios/fastlane/test_output
-**/android/fastlane/report.xml
-**/android/fastlane/Preview.html
-**/android/fastlane/screenshots
-**/android/fastlane/test_output
+**/**/android/fastlane/report.xml
+**/**/android/fastlane/Preview.html
+**/**/android/fastlane/screenshots
+**/**/android/fastlane/test_output
 
 # FVM
 .fvm/
