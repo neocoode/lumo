@@ -177,6 +177,8 @@ coverage/
 test_driver/
 integration_test/
 
+**/**/app/build
+
 # Firebase
 **/**/ios/build
 **/**/ios/firebase_app_id_file.json
