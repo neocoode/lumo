@@ -1,0 +1,13 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1565C0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="45" fill="url(#grad2)" stroke="#0D47A1" stroke-width="2"/>
+  <path d="M35 35 L65 35 L60 65 L40 65 Z" fill="#E3F2FD" stroke="#1565C0" stroke-width="2"/>
+  <circle cx="50" cy="50" r="8" fill="#1565C0"/>
+  <circle cx="50" cy="50" r="4" fill="#E3F2FD"/>
+  <text x="50" y="85" text-anchor="middle" font-family="Arial" font-size="12" fill="#0D47A1">SCI</text>
+</svg>

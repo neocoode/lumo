@@ -1,0 +1,157 @@
+{
+  "configs": {
+    "empty": {
+      "slides": [
+        {
+          "activeIndex": 0,
+          "selectedAnswer": null
+        },
+        {
+          "activeIndex": 1,
+          "selectedAnswer": null
+        },
+        {
+          "activeIndex": 2,
+          "selectedAnswer": null
+        },
+        {
+          "activeIndex": 3,
+          "selectedAnswer": null
+        },
+        {
+          "activeIndex": 4,
+          "selectedAnswer": null
+        }
+      ],
+      "totalCorrect": 0,
+      "totalWrong": 0,
+      "totalQuestions": 5,
+      "totalAnswered": 0,
+      "accuracyPercent": 0.0
+    },
+    "withAnswers": {
+      "slides": [
+        {
+          "activeIndex": 0,
+          "selectedAnswer": 2,
+          "wasAnswered": true
+        },
+        {
+          "activeIndex": 1,
+          "selectedAnswer": 1,
+          "wasAnswered": true
+        },
+        {
+          "activeIndex": 2,
+          "selectedAnswer": 0,
+          "wasAnswered": true
+        },
+        {
+          "activeIndex": 3,
+          "selectedAnswer": null,
+          "wasAnswered": false
+        },
+        {
+          "activeIndex": 4,
+          "selectedAnswer": null,
+          "wasAnswered": false
+        }
+      ],
+      "totalCorrect": 2,
+      "totalWrong": 1,
+      "totalQuestions": 5,
+      "totalAnswered": 3,
+      "accuracyPercent": 40.0
+    }
+  },
+  "data": [
+    {
+      "backgroundImage": "assets/images/geografia.svg",
+      "backgroundColor": {
+        "value": 4283212498,
+        "hex": "#4CAF50"
+      },
+      "question": {
+        "question": "Qual é a capital do Brasil?",
+        "options": ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador"],
+        "correctAnswer": 2,
+        "explanation": "Brasília é a capital federal do Brasil desde 1960.",
+        "category": "geography",
+        "imagePath": "assets/images/geografia.svg"
+      }
+    },
+    {
+      "backgroundImage": "assets/images/ciencia.svg",
+      "backgroundColor": {
+        "value": 4280391915,
+        "hex": "#2196F3"
+      },
+      "question": {
+        "question": "Qual é o maior planeta do sistema solar?",
+        "options": ["Terra", "Saturno", "Júpiter", "Netuno"],
+        "correctAnswer": 2,
+        "explanation": "Júpiter é o maior planeta do sistema solar, com massa maior que todos os outros planetas juntos.",
+        "category": "science",
+        "imagePath": "assets/images/ciencia.svg"
+      }
+    },
+    {
+      "backgroundImage": "assets/images/literatura.svg",
+      "backgroundColor": {
+        "value": 4294967040,
+        "hex": "#FF9800"
+      },
+      "question": {
+        "question": "Quem escreveu 'Dom Casmurro'?",
+        "options": [
+          "Machado de Assis",
+          "José de Alencar",
+          "Castro Alves",
+          "Graciliano Ramos"
+        ],
+        "correctAnswer": 0,
+        "explanation": "Machado de Assis é o autor de 'Dom Casmurro', publicado em 1899.",
+        "category": "literature",
+        "imagePath": "assets/images/literatura.svg"
+      }
+    },
+    {
+      "backgroundImage": "assets/images/historia.svg",
+      "backgroundColor": {
+        "value": 4291641296,
+        "hex": "#9C27B0"
+      },
+      "question": {
+        "question": "Em que ano o Brasil foi descoberto?",
+        "options": ["1498", "1500", "1502", "1504"],
+        "correctAnswer": 1,
+        "explanation": "O Brasil foi descoberto em 22 de abril de 1500 por Pedro Álvares Cabral.",
+        "category": "history",
+        "imagePath": "assets/images/historia.svg"
+      }
+    },
+    {
+      "backgroundImage": "assets/images/ciencia.svg",
+      "backgroundColor": {
+        "value": 4280391915,
+        "hex": "#00BCD4"
+      },
+      "question": {
+        "question": "Qual é a fórmula química da água?",
+        "options": ["H2O", "CO2", "NaCl", "O2"],
+        "correctAnswer": 0,
+        "explanation": "A água é composta por dois átomos de hidrogênio e um de oxigênio (H2O).",
+        "category": "science",
+        "imagePath": "assets/images/ciencia.svg"
+      }
+    }
+  ],
+  "categories": [
+    "geography",
+    "science",
+    "literature",
+    "history",
+    "mathematics",
+    "biology"
+  ]
+}
