@@ -178,6 +178,7 @@ test_driver/
 integration_test/
 
 # Firebase
+**/ios/build
 **/ios/firebase_app_id_file.json
 **/ios/GoogleService-Info.plist
 **/android/app/google-services.json
