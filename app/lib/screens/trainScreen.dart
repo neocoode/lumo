@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import '../stores/challengesStore.dart';
 import 'gameScreen.dart';
 
@@ -55,9 +56,9 @@ class _TrainScreenState extends State<TrainScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF4CAF50),
-              Color(0xFF45a049),
-              Color(0xFF2E7D32),
+              Color(0xFF9C27B0),
+              Color(0xFF8E24AA),
+              Color(0xFF7B1FA2),
             ],
           ),
         ),
@@ -90,33 +91,48 @@ class _TrainScreenState extends State<TrainScreen>
                               ),
                             ),
                             const SizedBox(width: 16),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Modo Treino',
-                                    style: TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
+                                  AnimatedTextKit(
+                                    animatedTexts: [
+                                      TypewriterAnimatedText(
+                                        'Modo Treino',
+                                        textStyle: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                        speed:
+                                            const Duration(milliseconds: 100),
+                                      ),
+                                    ],
+                                    totalRepeatCount: 1,
                                   ),
-                                  Text(
-                                    'Pratique sem pressão',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white70,
-                                    ),
+                                  const SizedBox(height: 20),
+                                  AnimatedTextKit(
+                                    animatedTexts: [
+                                      FadeAnimatedText(
+                                        'Pratique sem pressão',
+                                        textStyle: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white70,
+                                        ),
+                                        duration:
+                                            const Duration(milliseconds: 2000),
+                                      ),
+                                    ],
+                                    totalRepeatCount: 1,
                                   ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 32),
-                        
+
                         // Training modes
                         Expanded(
                           child: Consumer<ChallengesStore>(
@@ -132,42 +148,48 @@ class _TrainScreenState extends State<TrainScreen>
                                     title: 'Quiz Rápido',
                                     subtitle: '5 perguntas',
                                     color: const Color(0xFF2196F3),
-                                    onTap: () => _startQuickQuiz(context, challengesStore),
+                                    onTap: () => _startQuickQuiz(
+                                        context, challengesStore),
                                   ),
                                   _buildTrainingCard(
                                     icon: Icons.category_rounded,
                                     title: 'Por Categoria',
                                     subtitle: 'Geografia',
                                     color: const Color(0xFF9C27B0),
-                                    onTap: () => _startCategoryTraining(context, challengesStore, 'geography'),
+                                    onTap: () => _startCategoryTraining(
+                                        context, challengesStore, 'geography'),
                                   ),
                                   _buildTrainingCard(
                                     icon: Icons.science_rounded,
                                     title: 'Ciências',
                                     subtitle: 'Física e Química',
                                     color: const Color(0xFFFF9800),
-                                    onTap: () => _startCategoryTraining(context, challengesStore, 'science'),
+                                    onTap: () => _startCategoryTraining(
+                                        context, challengesStore, 'science'),
                                   ),
                                   _buildTrainingCard(
                                     icon: Icons.menu_book_rounded,
                                     title: 'Literatura',
                                     subtitle: 'Livros e autores',
                                     color: const Color(0xFFE91E63),
-                                    onTap: () => _startCategoryTraining(context, challengesStore, 'literature'),
+                                    onTap: () => _startCategoryTraining(
+                                        context, challengesStore, 'literature'),
                                   ),
                                   _buildTrainingCard(
                                     icon: Icons.history_rounded,
                                     title: 'História',
                                     subtitle: 'Brasil e mundo',
                                     color: const Color(0xFF795548),
-                                    onTap: () => _startCategoryTraining(context, challengesStore, 'history'),
+                                    onTap: () => _startCategoryTraining(
+                                        context, challengesStore, 'history'),
                                   ),
                                   _buildTrainingCard(
                                     icon: Icons.psychology_rounded,
                                     title: 'Aleatório',
                                     subtitle: 'Todas as categorias',
                                     color: const Color(0xFF607D8B),
-                                    onTap: () => _startRandomTraining(context, challengesStore),
+                                    onTap: () => _startRandomTraining(
+                                        context, challengesStore),
                                   ),
                                 ],
                               );
@@ -250,7 +272,8 @@ class _TrainScreenState extends State<TrainScreen>
     );
   }
 
-  void _startQuickQuiz(BuildContext context, ChallengesStore challengesStore) async {
+  void _startQuickQuiz(
+      BuildContext context, ChallengesStore challengesStore) async {
     // Start a quick 5-question quiz
     await challengesStore.startGame();
     if (context.mounted) {
@@ -263,7 +286,8 @@ class _TrainScreenState extends State<TrainScreen>
     }
   }
 
-  void _startCategoryTraining(BuildContext context, ChallengesStore challengesStore, String category) async {
+  void _startCategoryTraining(BuildContext context,
+      ChallengesStore challengesStore, String category) async {
     // Start training for specific category
     await challengesStore.startGame();
     if (context.mounted) {
@@ -276,7 +300,8 @@ class _TrainScreenState extends State<TrainScreen>
     }
   }
 
-  void _startRandomTraining(BuildContext context, ChallengesStore challengesStore) async {
+  void _startRandomTraining(
+      BuildContext context, ChallengesStore challengesStore) async {
     // Start random training
     await challengesStore.startGame();
     if (context.mounted) {

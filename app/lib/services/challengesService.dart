@@ -162,6 +162,20 @@ class ChallengesService implements IChallengesApiService {
     }
   }
 
+  @override
+  Future<ISlideCollectionDocument> getChallengeById(String id) async {
+    try {
+      return await _currentService.getChallengeById(id);
+    } catch (e) {
+      if (_isApiAvailable) {
+        print('Erro na API, tentando fallback: $e');
+        _isApiAvailable = false;
+        return await _fallbackService.getChallengeById(id);
+      }
+      rethrow;
+    }
+  }
+
   // Métodos utilitários
   bool get isApiAvailable => _isApiAvailable;
   String? get lastError => _lastError;
@@ -179,7 +193,8 @@ class ChallengesService implements IChallengesApiService {
     return await _fallbackService.getCategories();
   }
 
-  Future<List<ISlideData>> getOfflineChallengesByCategory(String category) async {
+  Future<List<ISlideData>> getOfflineChallengesByCategory(
+      String category) async {
     return await _fallbackService.getChallengesByCategory(category);
   }
 

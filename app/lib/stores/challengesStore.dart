@@ -103,6 +103,35 @@ class ChallengesStore extends ChangeNotifier {
     }
   }
 
+  // Start preview of specific challenge
+  Future<void> startChallengePreview(String challengeId) async {
+    _loading = true;
+    _error = null;
+    _isOfflineMode = false;
+    notifyListeners();
+
+    try {
+      // Fetch specific challenge data from API
+      _challengesData = await _challengesService.getChallengeById(challengeId);
+      _configs = _challengesData!.configs;
+      _currentQuestion = 0;
+      _gameStarted = true;
+      _gameFinished = false;
+      _usingFallback = false;
+
+      print('✅ Challenge preview loaded from API');
+      print(
+          '📊 Loaded: ${_challengesData!.data.length} slides for challenge $challengeId');
+    } catch (e) {
+      _error = 'Erro ao carregar preview do challenge: $e';
+      _isOfflineMode = true;
+      print('❌ Error starting challenge preview: $e');
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
   // Load game with specific configurations
   void loadGameWithConfigs(ISlideConfigs configs) {
     if (_challengesData == null) return;

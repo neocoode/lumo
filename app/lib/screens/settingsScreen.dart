@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../components/genericHeader.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -59,187 +60,98 @@ class _SettingsScreenState extends State<SettingsScreen>
           ),
         ),
         child: SafeArea(
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: const Icon(
-                                Icons.settings_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Configurações',
-                                    style: TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Personalize sua experiência',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 32),
-                        
-                        // Profile Section
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
+          child: Column(
+            children: [
+              // Header genérico
+              const GenericHeader(
+                title: 'Configurações',
+                backgroundColor: Colors.transparent,
+                textColor: Colors.white,
+                iconColor: Colors.white,
+                userIcon: Icons.settings_rounded,
+              ),
+
+              // Conteúdo principal
+              Expanded(
+                child: AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SlideTransition(
+                        position: _slideAnimation,
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Profile Photo
-                              GestureDetector(
-                                onTap: () => _showProfilePhotoDialog(context),
-                                child: Stack(
+                              const SizedBox(height: 16),
+
+                              // Profile Section
+                              _buildProfileCard(),
+
+                              const SizedBox(height: 24),
+
+                              // Settings Options
+                              Expanded(
+                                child: ListView(
                                   children: [
-                                    CircleAvatar(
-                                      radius: 40,
-                                      backgroundColor: const Color(0xFF9C27B0).withOpacity(0.1),
-                                      child: const Icon(
-                                        Icons.person_rounded,
-                                        size: 40,
-                                        color: Color(0xFF9C27B0),
-                                      ),
+                                    _buildSettingsItem(
+                                      icon: Icons.notifications_rounded,
+                                      title: 'Notificações',
+                                      subtitle: 'Gerenciar alertas',
+                                      onTap: () =>
+                                          _showNotificationsSettings(context),
                                     ),
-                                    Positioned(
-                                      bottom: 0,
-                                      right: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFF9C27B0),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.camera_alt_rounded,
-                                          color: Colors.white,
-                                          size: 16,
-                                        ),
-                                      ),
+                                    _buildSettingsItem(
+                                      icon: Icons.volume_up_rounded,
+                                      title: 'Som',
+                                      subtitle: 'Efeitos sonoros',
+                                      onTap: () => _showSoundSettings(context),
+                                    ),
+                                    _buildSettingsItem(
+                                      icon: Icons.palette_rounded,
+                                      title: 'Tema',
+                                      subtitle: 'Cores e aparência',
+                                      onTap: () => _showThemeSettings(context),
+                                    ),
+                                    _buildSettingsItem(
+                                      icon: Icons.language_rounded,
+                                      title: 'Idioma',
+                                      subtitle: 'Português (Brasil)',
+                                      onTap: () =>
+                                          _showLanguageSettings(context),
+                                    ),
+                                    _buildSettingsItem(
+                                      icon: Icons.analytics_rounded,
+                                      title: 'Estatísticas',
+                                      subtitle: 'Ver seu progresso',
+                                      onTap: () => _showStatistics(context),
+                                    ),
+                                    _buildSettingsItem(
+                                      icon: Icons.help_rounded,
+                                      title: 'Ajuda',
+                                      subtitle: 'FAQ e suporte',
+                                      onTap: () => _showHelp(context),
+                                    ),
+                                    _buildSettingsItem(
+                                      icon: Icons.info_rounded,
+                                      title: 'Sobre',
+                                      subtitle: 'Versão 1.0.0',
+                                      onTap: () => _showAbout(context),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Usuário',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              Text(
-                                'user@example.com',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
                             ],
                           ),
                         ),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Settings Options
-                        Expanded(
-                          child: ListView(
-                            children: [
-                              _buildSettingsItem(
-                                icon: Icons.notifications_rounded,
-                                title: 'Notificações',
-                                subtitle: 'Gerenciar alertas',
-                                onTap: () => _showNotificationsSettings(context),
-                              ),
-                              _buildSettingsItem(
-                                icon: Icons.volume_up_rounded,
-                                title: 'Som',
-                                subtitle: 'Efeitos sonoros',
-                                onTap: () => _showSoundSettings(context),
-                              ),
-                              _buildSettingsItem(
-                                icon: Icons.palette_rounded,
-                                title: 'Tema',
-                                subtitle: 'Cores e aparência',
-                                onTap: () => _showThemeSettings(context),
-                              ),
-                              _buildSettingsItem(
-                                icon: Icons.language_rounded,
-                                title: 'Idioma',
-                                subtitle: 'Português (Brasil)',
-                                onTap: () => _showLanguageSettings(context),
-                              ),
-                              _buildSettingsItem(
-                                icon: Icons.analytics_rounded,
-                                title: 'Estatísticas',
-                                subtitle: 'Ver seu progresso',
-                                onTap: () => _showStatistics(context),
-                              ),
-                              _buildSettingsItem(
-                                icon: Icons.help_rounded,
-                                title: 'Ajuda',
-                                subtitle: 'FAQ e suporte',
-                                onTap: () => _showHelp(context),
-                              ),
-                              _buildSettingsItem(
-                                icon: Icons.info_rounded,
-                                title: 'Sobre',
-                                subtitle: 'Versão 1.0.0',
-                                onTap: () => _showAbout(context),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ],
           ),
         ),
       ),
@@ -362,6 +274,72 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   void _showHelp(BuildContext context) {
     // TODO: Implement help view
+  }
+
+  Widget _buildProfileCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // User Avatar
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: const Color(0xFF9C27B0).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: const Icon(
+              Icons.person_rounded,
+              color: Color(0xFF9C27B0),
+              size: 25,
+            ),
+          ),
+          const SizedBox(width: 16),
+          // User Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Usuário',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'usuario@exemplo.com',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Arrow icon
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: Colors.grey[400],
+            size: 16,
+          ),
+        ],
+      ),
+    );
   }
 
   void _showAbout(BuildContext context) {

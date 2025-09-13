@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import '../stores/challengesStore.dart';
 import 'gameScreen.dart';
 
@@ -72,9 +73,9 @@ class _OnlineScreenState extends State<OnlineScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFFE91E63),
-              Color(0xFFC2185B),
-              Color(0xFFAD1457),
+              Color(0xFF9C27B0),
+              Color(0xFF8E24AA),
+              Color(0xFF7B1FA2),
             ],
           ),
         ),
@@ -115,24 +116,39 @@ class _OnlineScreenState extends State<OnlineScreen>
                               },
                             ),
                             const SizedBox(width: 16),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Modo Online',
-                                    style: TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
+                                  AnimatedTextKit(
+                                    animatedTexts: [
+                                      TypewriterAnimatedText(
+                                        'Modo Online',
+                                        textStyle: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                        speed:
+                                            const Duration(milliseconds: 100),
+                                      ),
+                                    ],
+                                    totalRepeatCount: 1,
                                   ),
-                                  Text(
-                                    'Jogue com seus amigos',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white70,
-                                    ),
+                                  const SizedBox(height: 20),
+                                  AnimatedTextKit(
+                                    animatedTexts: [
+                                      FadeAnimatedText(
+                                        'Jogue com seus amigos',
+                                        textStyle: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white70,
+                                        ),
+                                        duration:
+                                            const Duration(milliseconds: 2000),
+                                      ),
+                                    ],
+                                    totalRepeatCount: 1,
                                   ),
                                 ],
                               ),
@@ -366,8 +382,8 @@ class _OnlineScreenState extends State<OnlineScreen>
     );
   }
 
-  void _startOnlineChallenge(BuildContext context, ChallengesStore challengesStore,
-      String challengeType) async {
+  void _startOnlineChallenge(BuildContext context,
+      ChallengesStore challengesStore, String challengeType) async {
     // Start online challenge
     await challengesStore.startGame();
     if (context.mounted) {

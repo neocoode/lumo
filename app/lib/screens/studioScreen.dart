@@ -11,7 +11,8 @@ class StudioScreen extends StatefulWidget {
   State<StudioScreen> createState() => _StudioScreenState();
 }
 
-class _StudioScreenState extends State<StudioScreen> with TickerProviderStateMixin {
+class _StudioScreenState extends State<StudioScreen>
+    with TickerProviderStateMixin {
   late AnimationController _iconController;
   late AnimationController _buttonController;
   late Animation<double> _iconAnimation;
@@ -163,35 +164,8 @@ class _StudioScreenState extends State<StudioScreen> with TickerProviderStateMix
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const GameScreen(),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                _buildStudioButton(
-                                  icon: Icons.dashboard_outlined,
-                                  title: 'Templates',
-                                  subtitle: 'Usar modelos pré-definidos',
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => const GameScreen(),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                _buildStudioButton(
-                                  icon: Icons.import_export,
-                                  title: 'Importar',
-                                  subtitle: 'Importar quiz de arquivo',
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => const GameScreen(),
+                                        builder: (context) =>
+                                            const GameScreen(),
                                       ),
                                     );
                                   },
@@ -205,7 +179,8 @@ class _StudioScreenState extends State<StudioScreen> with TickerProviderStateMix
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const MyChallengesScreen(),
+                                        builder: (context) =>
+                                            const MyChallengesScreen(),
                                       ),
                                     );
                                   },

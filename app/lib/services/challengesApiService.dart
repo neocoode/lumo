@@ -13,6 +13,7 @@ abstract class IChallengesApiService {
   Future<ISlideConfigs> getConfigsWithAnswers();
   Future<bool> updateSlideAnswer(int index, int answer);
   Future<Map<String, dynamic>> getStats();
+  Future<ISlideCollectionDocument> getChallengeById(String id);
 }
 
 class ChallengesApiService implements IChallengesApiService {
@@ -215,6 +216,30 @@ class ChallengesApiService implements IChallengesApiService {
     } catch (e) {
       if (Environment.enableLogging) {
         print('Erro ao buscar estatísticas: $e');
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ISlideCollectionDocument> getChallengeById(String id) async {
+    try {
+      final response = await _makeRequest(
+        'GET',
+        '${Environment.apiUrl}/$id',
+      );
+
+      if (response['success'] == true) {
+        return ISlideCollectionDocument.fromJson(response['data']);
+      } else {
+        throw ApiException(
+          'Erro ao buscar challenge: ${response['message']}',
+          response['statusCode'] ?? 500,
+        );
+      }
+    } catch (e) {
+      if (Environment.enableLogging) {
+        print('Erro ao buscar challenge por ID: $e');
       }
       rethrow;
     }

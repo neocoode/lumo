@@ -1,11 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
-import 'homeScreen.dart';
 import 'trainScreen.dart';
 import 'onlineScreen.dart';
 import 'studioScreen.dart';
-import 'settingsScreen.dart';
+import 'menuScreen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -24,7 +23,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     const TrainScreen(),
     const OnlineScreen(),
     const StudioScreen(),
-    const SettingsScreen(),
+    const MenuScreen(),
   ];
 
   final List<BottomNavigationItem> _navigationItems = [
@@ -50,9 +49,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       lottiePath: 'assets/animations/studio.json',
     ),
     BottomNavigationItem(
-      icon: Icons.settings_rounded,
-      activeIcon: Icons.settings_rounded,
-      label: 'Config',
+      icon: Icons.menu_rounded,
+      activeIcon: Icons.menu_rounded,
+      label: 'Menu',
       color: const Color(0xFF9C27B0),
       lottiePath: 'assets/animations/settings.json',
     ),

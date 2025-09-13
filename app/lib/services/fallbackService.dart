@@ -207,6 +207,33 @@ class FallbackService implements IChallengesApiService {
     };
   }
 
+  @override
+  Future<ISlideCollectionDocument> getChallengeById(String id) async {
+    await _simulateDelay();
+    // Para o fallback, retornamos sempre os dados padrão
+    // Em um cenário real, você poderia ter dados específicos por ID
+    return ISlideCollectionDocument(
+      data: _fallbackSlides,
+      configs: ISlideConfigs(
+        slides: _fallbackSlides
+            .map((slide) => ISlideConfig(
+                  activeIndex: 0,
+                  selectedAnswer: null,
+                ))
+            .toList(),
+        totalCorrect: 0,
+        totalWrong: 0,
+        totalQuestions: _fallbackSlides.length,
+        totalAnswered: 0,
+        accuracyPercentage: 0.0,
+      ),
+      categories: _categories,
+      title: 'Challenge Fallback',
+      description: 'Dados offline para preview',
+      date: DateTime.now(),
+    );
+  }
+
   Future<void> _simulateDelay() async {
     await Future.delayed(Duration(milliseconds: 300 + Random().nextInt(500)));
   }

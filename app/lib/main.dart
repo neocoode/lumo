@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'screens/mainScreen.dart';
 import 'stores/challengesStore.dart';
 import 'stores/studioStore.dart';
+import 'stores/sessionStore.dart';
 
 void main() {
   runApp(const MeuJogoApp());
@@ -15,6 +16,7 @@ class MeuJogoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => SessionStore()),
         ChangeNotifierProvider(create: (context) => ChallengesStore()),
         ChangeNotifierProvider(create: (context) => StudioStore()),
       ],

@@ -27,7 +27,7 @@ class _BasicConfigStepState extends State<BasicConfigStep> {
   void initState() {
     super.initState();
     _loadCurrentData();
-    
+
     // Listener para quando o store for atualizado
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final store = Provider.of<StudioStore>(context, listen: false);
@@ -54,8 +54,8 @@ class _BasicConfigStepState extends State<BasicConfigStep> {
   void _updateStore() {
     final store = Provider.of<StudioStore>(context, listen: false);
     store.updateBasicConfig(
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
+      title: _titleController.text,
+      description: _descriptionController.text,
       category: _selectedCategory,
     );
   }
@@ -74,7 +74,7 @@ class _BasicConfigStepState extends State<BasicConfigStep> {
         if (store.category != _selectedCategory) {
           _selectedCategory = store.category;
         }
-        
+
         return Container(
           color: Colors.white,
           child: SingleChildScrollView(
@@ -99,80 +99,80 @@ class _BasicConfigStepState extends State<BasicConfigStep> {
                     color: Colors.black54,
                   ),
                 ),
-              const SizedBox(height: 32),
+                const SizedBox(height: 32),
 
-              // Campo Título
-              _buildInputField(
-                label: 'Título do Challenge',
-                controller: _titleController,
-                hintText: 'Ex: Quiz de Geografia do Brasil',
-                maxLines: 1,
-                onChanged: (value) => _updateStore(),
-              ),
-              const SizedBox(height: 24),
-
-              // Campo Descrição
-              _buildInputField(
-                label: 'Descrição',
-                controller: _descriptionController,
-                hintText: 'Descreva o que os participantes vão aprender...',
-                maxLines: 3,
-                onChanged: (value) => _updateStore(),
-              ),
-              const SizedBox(height: 24),
-
-              // Seletor de Categoria
-              const Text(
-                'Categoria',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                // Campo Título
+                _buildInputField(
+                  label: 'Título do Challenge',
+                  controller: _titleController,
+                  hintText: 'Ex: Quiz de Geografia do Brasil',
+                  maxLines: 1,
+                  onChanged: (value) => _updateStore(),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    width: 1,
-                  ),
+                const SizedBox(height: 24),
+
+                // Campo Descrição
+                _buildInputField(
+                  label: 'Descrição',
+                  controller: _descriptionController,
+                  hintText: 'Descreva o que os participantes vão aprender...',
+                  maxLines: 3,
+                  onChanged: (value) => _updateStore(),
                 ),
-                child: DropdownButtonFormField<String>(
-                  value: _selectedCategory,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.all(16),
-                  ),
-                  dropdownColor: Colors.white,
-                  style: const TextStyle(
-                    color: Colors.black87,
+                const SizedBox(height: 24),
+
+                // Seletor de Categoria
+                const Text(
+                  'Categoria',
+                  style: TextStyle(
                     fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
-                  items: _categories.map((category) {
-                    return DropdownMenuItem<String>(
-                      value: category['value'],
-                      child: Text(category['label']!),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _selectedCategory = value;
-                      });
-                      _updateStore();
-                    }
-                  },
                 ),
-              ),
-              const SizedBox(height: 20),
-              // Botões de navegação
-              _buildNavigationButtons(context, store),
-            ],
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.grey.shade300,
+                      width: 1,
+                    ),
+                  ),
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.all(16),
+                    ),
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16,
+                    ),
+                    items: _categories.map((category) {
+                      return DropdownMenuItem<String>(
+                        value: category['value'],
+                        child: Text(category['label']!),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                        _updateStore();
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Botões de navegação
+                _buildNavigationButtons(context, store),
+              ],
+            ),
           ),
-        ),
         );
       },
     );
@@ -263,7 +263,7 @@ class _BasicConfigStepState extends State<BasicConfigStep> {
             ),
             const SizedBox(width: 16),
           ],
-          
+
           // Botão Próximo/Salvar
           Expanded(
             child: ElevatedButton(

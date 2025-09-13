@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:provider/provider.dart';
 import '../services/challengesListService.dart';
 import '../models/apiModels.dart';
 import '../components/genericHeader.dart';
+import '../stores/challengesStore.dart';
 import 'gameScreen.dart';
 import 'studioEditorScreen.dart';
 
@@ -14,12 +16,13 @@ class MyChallengesScreen extends StatefulWidget {
   State<MyChallengesScreen> createState() => _MyChallengesScreenState();
 }
 
-class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProviderStateMixin {
+class _MyChallengesScreenState extends State<MyChallengesScreen>
+    with TickerProviderStateMixin {
   late AnimationController _iconController;
   late AnimationController _listController;
   late Animation<double> _iconAnimation;
   late Animation<double> _listAnimation;
-  
+
   final ChallengesListService _challengesListService = ChallengesListService();
   ChallengesListResponse? _challengesData;
   bool _loading = false;
@@ -135,7 +138,7 @@ class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProv
         const GenericHeader(
           title: 'Challenges Disponíveis',
         ),
-        
+
         // Ícone principal animado
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
@@ -170,7 +173,7 @@ class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProv
             },
           ),
         ),
-        
+
         // Textos animados
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -260,22 +263,22 @@ class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProv
               color: Colors.white.withOpacity(0.7),
             ),
             const SizedBox(height: 16),
-                Text(
-                  'Nenhum quiz encontrado',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Verifique sua conexão com a API',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 14,
-                  ),
-                ),
+            Text(
+              'Nenhum quiz encontrado',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Verifique sua conexão com a API',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 14,
+              ),
+            ),
           ],
         ),
       );
@@ -297,7 +300,8 @@ class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProv
                   child: SlideAnimation(
                     verticalOffset: 50.0,
                     child: FadeInAnimation(
-                      child: _buildChallengeCard(_challengesData!.challenges[index], index),
+                      child: _buildChallengeCard(
+                          _challengesData!.challenges[index], index),
                     ),
                   ),
                 );
@@ -472,7 +476,8 @@ class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProv
     );
   }
 
-  Widget _buildActionButton(String text, IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildActionButton(
+      String text, IconData icon, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -537,7 +542,7 @@ class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProv
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays == 0) {
       return 'Hoje';
     } else if (difference.inDays == 1) {
@@ -559,7 +564,7 @@ class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProv
         ),
       ),
     );
-    
+
     // Se retornou da tela de edição, recarregar a lista
     if (result == true || result == 'saved') {
       _loadChallenges();
@@ -574,7 +579,7 @@ class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProv
         builder: (context) => const StudioEditorScreen(),
       ),
     );
-    
+
     // Se retornou da tela de criação, recarregar a lista
     if (result == true || result == 'saved') {
       _loadChallenges();
@@ -646,14 +651,19 @@ class _MyChallengesScreenState extends State<MyChallengesScreen> with TickerProv
     // TODO: Implementar exclusão real e atualizar lista
   }
 
-  void _previewChallenge(ChallengeItem challenge) {
-    // Navegar para preview do challenge
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const GameScreen(),
-      ),
-    );
-    // TODO: Implementar modo preview no GameScreen
+  void _previewChallenge(ChallengeItem challenge) async {
+    // Carregar o challenge específico no store
+    final challengesStore = context.read<ChallengesStore>();
+    await challengesStore.startChallengePreview(challenge.id);
+
+    if (context.mounted) {
+      // Navegar para o GameScreen com o challenge carregado
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const GameScreen(),
+        ),
+      );
+    }
   }
 }

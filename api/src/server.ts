@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import { connectDatabase } from "./config/database";
 import challengesRoutes from "./routes/challenges";
 import studioRoutes from "./routes/studio";
+import authRoutes from "./routes/auth";
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -49,6 +50,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Rotas
+app.use("/api/auth", authRoutes);
 app.use("/api/challenges", challengesRoutes);
 app.use("/api/challenge", challengesRoutes);
 app.use("/api/studio", studioRoutes);
@@ -70,6 +72,7 @@ app.get("/", (req, res) => {
     message: "API do Jogo de Quiz Educativo",
     version: "1.0.0",
     endpoints: {
+      auth: "/api/auth",
       challenges: "/api/challenges",
       challenge: "/api/challenge",
       studio: "/api/studio",

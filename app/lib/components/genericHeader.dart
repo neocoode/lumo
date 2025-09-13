@@ -8,6 +8,7 @@ class GenericHeader extends StatelessWidget {
   final Color? backgroundColor;
   final Color? textColor;
   final Color? iconColor;
+  final bool showUserIcon;
 
   const GenericHeader({
     super.key,
@@ -18,6 +19,7 @@ class GenericHeader extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.iconColor,
+    this.showUserIcon = true,
   });
 
   @override
@@ -56,7 +58,7 @@ class GenericHeader extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Título centralizado
           Flexible(
             child: Text(
@@ -70,30 +72,33 @@ class GenericHeader extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          
-          // Ícone de usuário
-          GestureDetector(
-            onTap: onUserPressed,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: defaultIconColor.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+
+          // Ícone de usuário (condicional)
+          if (showUserIcon)
+            GestureDetector(
+              onTap: onUserPressed,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: defaultIconColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  defaultUserIcon,
+                  color: defaultIconColor,
+                  size: 20,
+                ),
               ),
-              child: Icon(
-                defaultUserIcon,
-                color: defaultIconColor,
-                size: 20,
-              ),
-            ),
-          ),
+            )
+          else
+            const SizedBox(width: 48), // Espaçamento para manter o layout
         ],
       ),
     );
