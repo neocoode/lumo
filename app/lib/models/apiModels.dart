@@ -187,11 +187,21 @@ class ISlideCollectionDocument {
   final List<ISlideData> data;
   final ISlideConfigs configs;
   final List<String> categories;
+  final String title;
+  final String description;
+  final DateTime date;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   ISlideCollectionDocument({
     required this.data,
     required this.configs,
     required this.categories,
+    required this.title,
+    required this.description,
+    required this.date,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toJson() {
@@ -199,6 +209,11 @@ class ISlideCollectionDocument {
       'data': data.map((d) => d.toJson()).toList(),
       'configs': configs.toJson(),
       'categories': categories,
+      'title': title,
+      'description': description,
+      'date': date.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -216,6 +231,11 @@ class ISlideCollectionDocument {
       data: (json['data'] as List).map((d) => ISlideData.fromJson(d)).toList(),
       configs: ISlideConfigs.fromJson(configsData),
       categories: List<String>.from(json['categories'] ?? []),
+      title: json['configs']['title'] ?? 'Quiz',
+      description: json['configs']['description'] ?? 'Descrição do quiz',
+      date: DateTime.parse(json['configs']['date'] ?? DateTime.now().toIso8601String()),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );
   }
 }

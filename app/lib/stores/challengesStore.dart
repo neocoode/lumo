@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/apiModels.dart';
-import '../services/slidesService.dart';
+import '../services/challengesService.dart';
 
-class SlidesStore extends ChangeNotifier {
+class ChallengesStore extends ChangeNotifier {
   // Game state
-  ISlideCollectionDocument? _slidesData;
+  ISlideCollectionDocument? _challengesData;
   ISlideConfigs _configs = ISlideConfigs(
     slides: [],
     totalCorrect: 0,
@@ -22,10 +22,10 @@ class SlidesStore extends ChangeNotifier {
   bool _isOfflineMode = false;
 
   // API service
-  final SlidesService _slidesService = SlidesService();
+  final ChallengesService _challengesService = ChallengesService();
 
   // Getters
-  ISlideCollectionDocument? get slidesData => _slidesData;
+  ISlideCollectionDocument? get challengesData => _challengesData;
   ISlideConfigs get configs => _configs;
   int get currentQuestion => _currentQuestion;
   bool get gameStarted => _gameStarted;
@@ -36,7 +36,7 @@ class SlidesStore extends ChangeNotifier {
   bool get isOfflineMode => _isOfflineMode;
 
   // Calculated getters
-  List<ISlideData> get slides => _slidesData?.data ?? [];
+  List<ISlideData> get slides => _challengesData?.data ?? [];
   int get totalQuestions => slides.length;
   int get score => _configs.totalCorrect;
   double get accuracyPercentage => _configs.accuracyPercentage;
@@ -46,7 +46,7 @@ class SlidesStore extends ChangeNotifier {
   ISlideQuestion? get currentQuestionObj => currentSlide?.question;
   String? get currentBackgroundImage => currentSlide?.backgroundImage;
   Color? get currentBackgroundColor => currentSlide?.backgroundColorColor;
-  List<String> get categories => _slidesData?.categories ?? [];
+  List<String> get categories => _challengesData?.categories ?? [];
 
   // Initialize game - Load all data from API and keep in memory
   Future<void> startGame() async {
@@ -57,8 +57,8 @@ class SlidesStore extends ChangeNotifier {
 
     try {
       // Fetch all data from API once and keep in memory
-      _slidesData = await _slidesService.getSlides();
-      _configs = _slidesData!.configs;
+      _challengesData = await _challengesService.getChallenges();
+      _configs = _challengesData!.configs;
       _currentQuestion = 0;
       _gameStarted = true;
       _gameFinished = false;
@@ -66,9 +66,9 @@ class SlidesStore extends ChangeNotifier {
 
       print('✅ All game data loaded from API and stored in memory');
       print(
-          '📊 Loaded: ${_slidesData!.data.length} slides, ${_slidesData!.categories.length} categories');
+          '📊 Loaded: ${_challengesData!.data.length} slides, ${_challengesData!.categories.length} categories');
     } catch (e) {
-      _error = _slidesService.lastError ?? 'Erro ao carregar dados: $e';
+      _error = _challengesService.lastError ?? 'Erro ao carregar dados: $e';
       _isOfflineMode = true;
       print('❌ Error starting game: $e');
     } finally {
@@ -86,8 +86,8 @@ class SlidesStore extends ChangeNotifier {
 
     try {
       // Fetch data from offline service
-      _slidesData = await _slidesService.getOfflineSlides();
-      _configs = _slidesData!.configs;
+      _challengesData = await _challengesService.getOfflineChallenges();
+      _configs = _challengesData!.configs;
       _currentQuestion = 0;
       _gameStarted = true;
       _gameFinished = false;
@@ -105,7 +105,7 @@ class SlidesStore extends ChangeNotifier {
 
   // Load game with specific configurations
   void loadGameWithConfigs(ISlideConfigs configs) {
-    if (_slidesData == null) return;
+    if (_challengesData == null) return;
 
     _configs = configs;
     _currentQuestion = 0;
@@ -187,8 +187,8 @@ class SlidesStore extends ChangeNotifier {
     _error = null;
 
     // Reset configurations using data already in memory
-    if (_slidesData != null) {
-      _configs = _slidesData!.configs;
+    if (_challengesData != null) {
+      _configs = _challengesData!.configs;
       print('🔄 Game restarted using data from memory');
     } else {
       print('⚠️ No data in memory, need to reload');
@@ -255,23 +255,23 @@ class SlidesStore extends ChangeNotifier {
       notifyListeners();
 
       // Use data already in memory if available
-      if (_slidesData != null) {
-        _configs = await _slidesService.getConfigsWithAnswers();
+      if (_challengesData != null) {
+        _configs = await _challengesService.getConfigsWithAnswers();
         _currentQuestion = 0;
         _gameStarted = true;
         _gameFinished = false;
         _error = null;
-        _usingFallback = !_slidesService.isApiAvailable;
+        _usingFallback = !_challengesService.isApiAvailable;
         print('📝 Example game loaded using data from memory');
       } else {
         // Load data if not in memory
-        _slidesData = await _slidesService.getSlides();
-        _configs = await _slidesService.getConfigsWithAnswers();
+        _challengesData = await _challengesService.getChallenges();
+        _configs = await _challengesService.getConfigsWithAnswers();
         _currentQuestion = 0;
         _gameStarted = true;
         _gameFinished = false;
         _error = null;
-        _usingFallback = !_slidesService.isApiAvailable;
+        _usingFallback = !_challengesService.isApiAvailable;
         print('📝 Example game loaded with fresh data');
       }
     } catch (e) {
@@ -286,8 +286,8 @@ class SlidesStore extends ChangeNotifier {
   Future<List<ISlideData>> searchSlidesByCategory(String category) async {
     try {
       // Use data already in memory if available
-      if (_slidesData != null) {
-        final filteredSlides = _slidesData!.data.where((slide) {
+      if (_challengesData != null) {
+        final filteredSlides = _challengesData!.data.where((slide) {
           return slide.question.category.name.toLowerCase() ==
               category.toLowerCase();
         }).toList();
@@ -296,7 +296,7 @@ class SlidesStore extends ChangeNotifier {
         return filteredSlides;
       } else {
         // Fallback to API if no data in memory
-        return await _slidesService.getSlidesByCategory(category);
+        return await _challengesService.getChallengesByCategory(category);
       }
     } catch (e) {
       print('Error searching slides by category: $e');
@@ -308,13 +308,13 @@ class SlidesStore extends ChangeNotifier {
   Future<Map<String, dynamic>> getStatistics() async {
     try {
       // Use data already in memory if available
-      if (_slidesData != null) {
+      if (_challengesData != null) {
         final stats = {
-          'totalSlides': _slidesData!.data.length,
-          'totalCategories': _slidesData!.categories.length,
+          'totalSlides': _challengesData!.data.length,
+          'totalCategories': _challengesData!.categories.length,
           'slidesByCategory': {
-            for (String category in _slidesData!.categories)
-              category: _slidesData!.data.where((slide) {
+            for (String category in _challengesData!.categories)
+              category: _challengesData!.data.where((slide) {
                 return slide.question.category.name.toLowerCase() ==
                     category.toLowerCase();
               }).length,
@@ -330,7 +330,7 @@ class SlidesStore extends ChangeNotifier {
         return stats;
       } else {
         // Fallback to API if no data in memory
-        return await _slidesService.getStats();
+        return await _challengesService.getStats();
       }
     } catch (e) {
       print('Error getting statistics: $e');
@@ -340,8 +340,8 @@ class SlidesStore extends ChangeNotifier {
 
   // Check API status
   Future<void> checkApiStatus() async {
-    await _slidesService.forceApiCheck();
-    _usingFallback = !_slidesService.isApiAvailable;
+    await _challengesService.forceApiCheck();
+    _usingFallback = !_challengesService.isApiAvailable;
     notifyListeners();
   }
 
@@ -352,8 +352,8 @@ class SlidesStore extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _slidesService.forceApiCheck();
-      if (_slidesService.isApiAvailable) {
+      await _challengesService.forceApiCheck();
+      if (_challengesService.isApiAvailable) {
         _isOfflineMode = false;
         await startGame();
       } else {
@@ -371,7 +371,7 @@ class SlidesStore extends ChangeNotifier {
 
   @override
   void dispose() {
-    _slidesService.dispose();
+    _challengesService.dispose();
     super.dispose();
   }
 }

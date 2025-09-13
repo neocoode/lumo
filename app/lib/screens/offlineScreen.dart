@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../stores/slidesStore.dart';
+import '../stores/challengesStore.dart';
 import 'gameScreen.dart';
 
 class OfflineScreen extends StatelessWidget {
@@ -120,8 +120,8 @@ class OfflineScreen extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () async {
                     // Navegar para o jogo com dados offline
-                    final slidesStore = context.read<SlidesStore>();
-                    await slidesStore.startOfflineGame();
+                    final challengesStore = context.read<ChallengesStore>();
+                    await challengesStore.startOfflineGame();
 
                     if (context.mounted) {
                       Navigator.push(

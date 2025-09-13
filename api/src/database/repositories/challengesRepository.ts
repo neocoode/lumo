@@ -6,28 +6,28 @@ import {
   IMockData,
 } from "../../interfaces/mongo";
 import {
-  SlidesCollectionModel,
+  ChallengesCollectionModel,
   ISlideCollectionDocument as ISlideCollectionDocumentModel,
-} from "../../models/SlidesCollection";
+} from "../../models/ChallengesCollection";
 
-export class SlidesRepository {
+export class ChallengesRepository {
   private collection: any;
 
   constructor(collection: any) {
     this.collection = collection;
   }
 
-  // Criar documento completo de slides
-  async create(slidesData: ICreateSlidesData): Promise<ISlideCollectionDocument> {
+  // Criar documento completo de challenges
+  async create(challengesData: ICreateSlidesData): Promise<ISlideCollectionDocument> {
     const result = await this.collection.insertOne({
-      ...slidesData,
+      ...challengesData,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
     return {
       _id: result.insertedId,
-      ...slidesData,
+      ...challengesData,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -39,13 +39,13 @@ export class SlidesRepository {
     await this.deleteAll();
 
     // Criar novo documento com dados do mock
-    const slidesData: ICreateSlidesData = {
+    const challengesData: ICreateSlidesData = {
       configs: mockData.configs,
       data: mockData.data,
       categories: mockData.categories,
     };
 
-    return await this.create(slidesData);
+    return await this.create(challengesData);
   }
 
   // Buscar documento por ID
@@ -124,7 +124,7 @@ export class SlidesRepository {
   }
 
   // Buscar slides por categoria
-  async getSlidesByCategory(category: string): Promise<any[]> {
+  async getChallengesByCategory(category: string): Promise<any[]> {
     const mainDoc = await this.findMain();
     if (!mainDoc) return [];
 
@@ -150,12 +150,12 @@ export class SlidesRepository {
   }
 
   // Buscar todos os slides (data)
-  async getAllSlides(): Promise<any[]> {
+  async getAllChallenges(): Promise<any[]> {
     const mainDoc = await this.findMain();
     return mainDoc ? mainDoc.data : [];
   }
 
-  // Estatísticas dos slides
+  // Estatísticas dos challenges
   async getStats(): Promise<{
     total: number;
     byCategory: { [key: string]: number };

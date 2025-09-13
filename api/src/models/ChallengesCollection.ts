@@ -7,6 +7,16 @@ export interface ISlideConfig {
   wasAnswered?: boolean;
 }
 
+// Interface para metadados do quiz
+export interface IQuizMetadata {
+  title: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+  difficulty?: string;
+  author?: string;
+}
+
 // Interface para configurações dos slides
 export interface ISlideConfigs {
   slides: ISlideConfig[];
@@ -24,7 +34,7 @@ export interface ISlideQuestion {
   correctAnswer: number;
   explanation: string;
   category: string;
-  imagePath: string;
+  imagePath?: string;
 }
 
 // Interface para slide individual
@@ -42,6 +52,10 @@ export interface ISlideCollectionDocument extends Document {
   configs: {
     empty: ISlideConfigs;
     withAnswers: ISlideConfigs;
+    title: string;
+    description: string;
+    date: Date;
+    updatedAt: Date;
   };
   data: ISlideData[];
   categories: string[];
@@ -196,6 +210,28 @@ const SlidesCollectionSchema = new Schema<ISlideCollectionDocument>(
         type: SlideConfigsSchema,
         required: true,
       },
+      title: {
+        type: String,
+        required: true,
+        trim: true,
+        maxlength: 100,
+      },
+      description: {
+        type: String,
+        required: true,
+        trim: true,
+        maxlength: 500,
+      },
+      date: {
+        type: Date,
+        required: true,
+        default: Date.now,
+      },
+      updatedAt: {
+        type: Date,
+        required: true,
+        default: Date.now,
+      },
     },
     data: {
       type: [SlideDataSchema],
@@ -211,7 +247,8 @@ const SlidesCollectionSchema = new Schema<ISlideCollectionDocument>(
   }
 );
 
-export const SlidesCollectionModel = mongoose.model<ISlideCollectionDocument>(
-  "SlidesCollection",
-  SlidesCollectionSchema
+export const ChallengesCollectionModel = mongoose.model<ISlideCollectionDocument>(
+  "ChallengesCollection",
+  SlidesCollectionSchema,
+  "challenges"
 );

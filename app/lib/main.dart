@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/mainScreen.dart';
-import 'stores/slidesStore.dart';
+import 'stores/challengesStore.dart';
+import 'stores/studioStore.dart';
 
 void main() {
   runApp(const MeuJogoApp());
@@ -12,8 +13,11 @@ class MeuJogoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => SlidesStore(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ChallengesStore()),
+        ChangeNotifierProvider(create: (context) => StudioStore()),
+      ],
       child: MaterialApp(
         title: 'Quiz Game',
         theme: ThemeData(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../stores/slidesStore.dart';
+import '../stores/challengesStore.dart';
 import 'gameScreen.dart';
 
 class OnlineScreen extends StatefulWidget {
@@ -180,8 +180,8 @@ class _OnlineScreenState extends State<OnlineScreen>
 
                         // Online challenges
                         Expanded(
-                          child: Consumer<SlidesStore>(
-                            builder: (context, slidesStore, child) {
+                          child: Consumer<ChallengesStore>(
+                            builder: (context, challengesStore, child) {
                               return ListView(
                                 children: [
                                   _buildOnlineChallenge(
@@ -192,7 +192,7 @@ class _OnlineScreenState extends State<OnlineScreen>
                                     participants: 1247,
                                     color: const Color(0xFF4CAF50),
                                     onTap: () => _startOnlineChallenge(
-                                        context, slidesStore, 'daily'),
+                                        context, challengesStore, 'daily'),
                                   ),
                                   _buildOnlineChallenge(
                                     title: 'Quiz da Semana',
@@ -202,7 +202,7 @@ class _OnlineScreenState extends State<OnlineScreen>
                                     participants: 3421,
                                     color: const Color(0xFF2196F3),
                                     onTap: () => _startOnlineChallenge(
-                                        context, slidesStore, 'weekly'),
+                                        context, challengesStore, 'weekly'),
                                   ),
                                   _buildOnlineChallenge(
                                     title: 'Desafio Especial',
@@ -212,7 +212,7 @@ class _OnlineScreenState extends State<OnlineScreen>
                                     participants: 892,
                                     color: const Color(0xFFFF9800),
                                     onTap: () => _startOnlineChallenge(
-                                        context, slidesStore, 'special'),
+                                        context, challengesStore, 'special'),
                                   ),
                                   _buildOnlineChallenge(
                                     title: 'Quiz Relâmpago',
@@ -222,7 +222,7 @@ class _OnlineScreenState extends State<OnlineScreen>
                                     participants: 567,
                                     color: const Color(0xFFE91E63),
                                     onTap: () => _startOnlineChallenge(
-                                        context, slidesStore, 'lightning'),
+                                        context, challengesStore, 'lightning'),
                                   ),
                                 ],
                               );
@@ -366,10 +366,10 @@ class _OnlineScreenState extends State<OnlineScreen>
     );
   }
 
-  void _startOnlineChallenge(BuildContext context, SlidesStore slidesStore,
+  void _startOnlineChallenge(BuildContext context, ChallengesStore challengesStore,
       String challengeType) async {
     // Start online challenge
-    await slidesStore.startGame();
+    await challengesStore.startGame();
     if (context.mounted) {
       Navigator.push(
         context,

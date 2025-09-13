@@ -5,7 +5,7 @@ import '../components/resultHeader.dart';
 import '../components/resultScore.dart';
 import '../components/resultButtons.dart';
 import '../components/resultConfetti.dart';
-import '../stores/slidesStore.dart';
+import '../stores/challengesStore.dart';
 
 class ResultScreen extends StatefulWidget {
   const ResultScreen({super.key});
@@ -59,8 +59,8 @@ class _ResultScreenState extends State<ResultScreen>
     // Confetti será controlado no build method
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
-        final slidesStore = context.read<SlidesStore>();
-        if (slidesStore.shouldShowConfetti) {
+        final challengesStore = context.read<ChallengesStore>();
+        if (challengesStore.shouldShowConfetti) {
           _confetti.play();
         }
       }
@@ -77,12 +77,12 @@ class _ResultScreenState extends State<ResultScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SlidesStore>(
-      builder: (context, slidesStore, child) {
-        final corResultado = slidesStore.getResultColor();
-        final mensagem = slidesStore.getResultMessage();
-        final icone = slidesStore.getResultIcon();
-        final shouldShowConfetti = slidesStore.shouldShowConfetti;
+    return Consumer<ChallengesStore>(
+      builder: (context, challengesStore, child) {
+        final corResultado = challengesStore.getResultColor();
+        final mensagem = challengesStore.getResultMessage();
+        final icone = challengesStore.getResultIcon();
+        final shouldShowConfetti = challengesStore.shouldShowConfetti;
 
         return Scaffold(
           body: Stack(
@@ -111,8 +111,8 @@ class _ResultScreenState extends State<ResultScreen>
                         ),
                         const SizedBox(height: 40),
                         ResultScore(
-                          score: slidesStore.score,
-                          totalQuestions: slidesStore.totalQuestions,
+                          score: challengesStore.score,
+                          totalQuestions: challengesStore.totalQuestions,
                           scoreAnimation: _scoreAnimation,
                           resultColor: corResultado,
                         ),

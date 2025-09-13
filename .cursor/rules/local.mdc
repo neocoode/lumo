@@ -1,0 +1,7 @@
+---
+description: |
+  - nao mockar valores
+globs:
+  - "**/*"
+alwaysApply: true
+---

@@ -7,9 +7,6 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "seed": "ts-node src/scripts/seedData.ts",
-    "test-connection": "ts-node src/scripts/testConnection.ts",
-    "init-db": "ts-node src/scripts/initDatabase.ts",
     "test": "jest"
   },
   "keywords": ["quiz", "educativo", "api", "mongodb"],
