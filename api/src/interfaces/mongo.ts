@@ -1,4 +1,4 @@
-// Interfaces MongoDB baseadas no arquivo slides.json
+// Interfaces MongoDB para challenges
 
 export interface ISlideConfig {
   activeIndex: number;

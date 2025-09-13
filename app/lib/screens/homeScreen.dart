@@ -4,7 +4,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 import 'gameScreen.dart';
 import 'offlineScreen.dart';
-import '../stores/slidesStore.dart';
+import '../stores/challengesStore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,15 +64,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SlidesStore>(
-      builder: (context, slidesStore, child) {
+    return Consumer<ChallengesStore>(
+      builder: (context, challengesStore, child) {
         // Show offline screen if API is not available
-        if (slidesStore.isOfflineMode) {
+        if (challengesStore.isOfflineMode) {
           return OfflineScreen(
             onRetry: () async {
-              await slidesStore.retryApiConnection();
+              await challengesStore.retryApiConnection();
             },
-            errorMessage: slidesStore.error,
+            errorMessage: challengesStore.error,
           );
         }
 
@@ -159,12 +159,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           return Transform.scale(
                             scale: _buttonAnimation.value,
                             child: ElevatedButton(
-                              onPressed: slidesStore.loading
+                              onPressed: challengesStore.loading
                                   ? null
                                   : () async {
                                       // Start game with API data
                                       await context
-                                          .read<SlidesStore>()
+                                          .read<ChallengesStore>()
                                           .startGame();
 
                                       if (mounted) {
@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 ),
                                 elevation: 8,
                               ),
-                              child: slidesStore.loading
+                              child: challengesStore.loading
                                   ? const Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [

@@ -242,11 +242,7 @@ step "6️⃣ Limpando e inicializando dados no banco..."
 log "🗑️ Limpando collection 'slides' existente..."
 cd api
 
-# Verificar se o arquivo de dados existe
-if [ ! -f "data/slides.json" ]; then
-    error "Arquivo data/slides.json não encontrado!"
-    exit 1
-fi
+# Verificação de arquivo de dados removida - usar apenas banco de dados
 
 # Limpar collection slides
 log "Executando limpeza da collection..."
@@ -282,15 +278,8 @@ else
     warning "Falha ao limpar collection (pode não existir ainda)"
 fi
 
-# Executar script de inicialização
-log "📊 Executando script de inicialização do banco..."
-npm run init-db
-if [ $? -eq 0 ]; then
-    success "Dados inicializados no banco ✓"
-else
-    error "Falha ao inicializar dados no banco"
-    exit 1
-fi
+# Script de inicialização removido - usar apenas banco de dados
+log "📊 Script de inicialização removido - usando apenas banco de dados"
 
 cd ..
 

@@ -89,7 +89,7 @@ api/
 │   ├── routes/
 │   │   └── slidesLocal.ts             # Rotas para slides local
 │   └── scripts/
-│       └── initDatabase.ts            # Script de inicialização
+│       └── (removido)                 # Script de inicialização removido
 ├── mocks/
 │   └── slides.json                    # Dados mock
 └── package.json                       # Scripts npm
@@ -99,7 +99,7 @@ api/
 
 ### API (npm run)
 - `dev` - Iniciar em modo desenvolvimento
-- `init-db` - Inicializar banco de dados
+- `init-db` - (removido) - Usar apenas banco de dados
 - `seed` - Popular com dados de exemplo
 - `test-connection` - Testar conexão MongoDB
 
@@ -167,7 +167,7 @@ curl http://localhost:3000/api/slides-local/stats
 ### Dados não são inicializados
 1. Verificar se arquivo `api/mocks/slides.json` existe
 2. Verificar logs do script de inicialização
-3. Executar manualmente: `cd api && npm run init-db`
+3. Script de inicialização removido - usar apenas banco de dados
 
 ## 🔄 Reinicialização
 

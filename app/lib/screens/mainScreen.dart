@@ -4,6 +4,7 @@ import 'package:confetti/confetti.dart';
 import 'homeScreen.dart';
 import 'trainScreen.dart';
 import 'onlineScreen.dart';
+import 'studioScreen.dart';
 import 'settingsScreen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -20,20 +21,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late ConfettiController _confettiController;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
     const TrainScreen(),
     const OnlineScreen(),
+    const StudioScreen(),
     const SettingsScreen(),
   ];
 
   final List<BottomNavigationItem> _navigationItems = [
-    BottomNavigationItem(
-      icon: Icons.home_rounded,
-      activeIcon: Icons.home_rounded,
-      label: 'Início',
-      color: const Color(0xFF9C27B0),
-      lottiePath: 'assets/animations/home.json',
-    ),
     BottomNavigationItem(
       icon: Icons.fitness_center_rounded,
       activeIcon: Icons.fitness_center_rounded,
@@ -49,9 +43,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       lottiePath: 'assets/animations/live.json',
     ),
     BottomNavigationItem(
+      icon: Icons.movie_creation_rounded,
+      activeIcon: Icons.movie_creation_rounded,
+      label: 'Studio',
+      color: const Color(0xFF9C27B0),
+      lottiePath: 'assets/animations/studio.json',
+    ),
+    BottomNavigationItem(
       icon: Icons.settings_rounded,
       activeIcon: Icons.settings_rounded,
-      label: 'Configurações',
+      label: 'Config',
       color: const Color(0xFF9C27B0),
       lottiePath: 'assets/animations/settings.json',
     ),
@@ -92,7 +93,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       });
 
       // Confetti effect for certain tabs
-      if (index == 1 || index == 2) {
+      if (index == 0 || index == 1) {
         _confettiController.play();
       }
     }

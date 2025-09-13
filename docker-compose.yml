@@ -11,7 +11,6 @@ services:
       MONGO_INITDB_DATABASE: lumo
     volumes:
       - mongodb_data:/data/db
-      - ./api/mongo-init:/docker-entrypoint-initdb.d
     networks:
       - meu_jogo_network
     healthcheck:

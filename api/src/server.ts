@@ -6,7 +6,8 @@ import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
 
 import { connectDatabase } from "./config/database";
-import slidesRoutes from "./routes/slides";
+import challengesRoutes from "./routes/challenges";
+import studioRoutes from "./routes/studio";
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -48,7 +49,9 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Rotas
-app.use("/api/slides", slidesRoutes);
+app.use("/api/challenges", challengesRoutes);
+app.use("/api/challenge", challengesRoutes);
+app.use("/api/studio", studioRoutes);
 
 // Rota de health check
 app.get("/health", (req, res) => {
@@ -67,7 +70,9 @@ app.get("/", (req, res) => {
     message: "API do Jogo de Quiz Educativo",
     version: "1.0.0",
     endpoints: {
-      slides: "/api/slides",
+      challenges: "/api/challenges",
+      challenge: "/api/challenge",
+      studio: "/api/studio",
       health: "/health",
     },
   });

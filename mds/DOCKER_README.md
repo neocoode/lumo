@@ -113,7 +113,6 @@ services:
       MONGO_INITDB_DATABASE: meu_jogo
     volumes:
       - mongodb_data:/data/db
-      - ./api/mongo-init:/docker-entrypoint-initdb.d
 
   mongo-express:
     image: mongo-express:1.0.0
@@ -126,9 +125,7 @@ services:
 ```
 
 ### Inicialização Automática
-O script `api/mongo-init/01-init-database.js` é executado automaticamente e:
-- Cria usuário da aplicação
-- Cria coleções necessárias
+Script de inicialização removido - usar apenas banco de dados
 - Cria índices para performance
 - Configura permissões
 

@@ -1,8 +1,8 @@
 import 'dart:math';
 import '../models/apiModels.dart';
-import 'slidesApiService.dart';
+import 'challengesApiService.dart';
 
-class FallbackService implements ISlidesApiService {
+class FallbackService implements IChallengesApiService {
   static final List<ISlideData> _fallbackSlides = [
     ISlideData(
       backgroundImage: "assets/images/geografia.svg",
@@ -85,7 +85,7 @@ class FallbackService implements ISlidesApiService {
   ];
 
   @override
-  Future<ISlideCollectionDocument> getSlides() async {
+  Future<ISlideCollectionDocument> getChallenges() async {
     await _simulateDelay();
 
     final configs = ISlideConfigs(
@@ -106,6 +106,9 @@ class FallbackService implements ISlidesApiService {
       data: _fallbackSlides,
       configs: configs,
       categories: _categories,
+      title: 'Quiz',
+      description: 'Quiz disponível offline',
+      date: DateTime.now(),
     );
   }
 
@@ -116,7 +119,7 @@ class FallbackService implements ISlidesApiService {
   }
 
   @override
-  Future<List<ISlideData>> getSlidesByCategory(String category) async {
+  Future<List<ISlideData>> getChallengesByCategory(String category) async {
     await _simulateDelay();
     return _fallbackSlides.where((slide) {
       return slide.question.category.name.toLowerCase() ==

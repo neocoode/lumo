@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/meu_jogo";
+  process.env.MONGODB_URI || "mongodb://admin:admin123@localhost:27017/lumo";
 
 export const connectDatabase = async (): Promise<void> => {
   try {

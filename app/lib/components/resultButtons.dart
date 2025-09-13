@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/homeScreen.dart';
-import '../stores/slidesStore.dart';
+import '../stores/challengesStore.dart';
 
 class ResultButtons extends StatelessWidget {
   final Animation<double> buttonAnimation;
@@ -28,7 +28,7 @@ class ResultButtons extends StatelessWidget {
                     buttonController.forward().then((_) {
                       buttonController.reverse();
                     });
-                    context.read<SlidesStore>().restartGame();
+                    context.read<ChallengesStore>().restartGame();
                     Navigator.pushAndRemoveUntil(
                       context,
                       PageRouteBuilder(
@@ -80,7 +80,7 @@ class ResultButtons extends StatelessWidget {
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              context.read<SlidesStore>().returnHome();
+              context.read<ChallengesStore>().returnHome();
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(

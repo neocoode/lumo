@@ -4,10 +4,10 @@ import 'package:http/http.dart' as http;
 import '../config/environment.dart';
 import '../models/apiModels.dart';
 
-abstract class ISlidesApiService {
-  Future<ISlideCollectionDocument> getSlides();
+abstract class IChallengesApiService {
+  Future<ISlideCollectionDocument> getChallenges();
   Future<List<String>> getCategories();
-  Future<List<ISlideData>> getSlidesByCategory(String category);
+  Future<List<ISlideData>> getChallengesByCategory(String category);
   Future<ISlideData?> getSlideByIndex(int index);
   Future<ISlideConfigs> getConfigsEmpty();
   Future<ISlideConfigs> getConfigsWithAnswers();
@@ -15,35 +15,35 @@ abstract class ISlidesApiService {
   Future<Map<String, dynamic>> getStats();
 }
 
-class SlidesApiService implements ISlidesApiService {
+class ChallengesApiService implements IChallengesApiService {
   final http.Client _client;
   final String _baseUrl;
 
-  SlidesApiService({
+  ChallengesApiService({
     http.Client? client,
     String? baseUrl,
   })  : _client = client ?? http.Client(),
         _baseUrl = baseUrl ?? Environment.apiUrl;
 
   @override
-  Future<ISlideCollectionDocument> getSlides() async {
+  Future<ISlideCollectionDocument> getChallenges() async {
     try {
       final response = await _makeRequest(
         'GET',
-        Environment.slidesEndpoint,
+        Environment.challengesEndpoint,
       );
 
       if (response['success'] == true) {
         return ISlideCollectionDocument.fromJson(response['data']);
       } else {
         throw ApiException(
-          'Erro ao buscar slides: ${response['message']}',
+          'Erro ao buscar challenges: ${response['message']}',
           response['statusCode'] ?? 500,
         );
       }
     } catch (e) {
       if (Environment.enableLogging) {
-        print('Erro ao buscar slides: $e');
+        print('Erro ao buscar challenges: $e');
       }
       rethrow;
     }
@@ -74,7 +74,7 @@ class SlidesApiService implements ISlidesApiService {
   }
 
   @override
-  Future<List<ISlideData>> getSlidesByCategory(String category) async {
+  Future<List<ISlideData>> getChallengesByCategory(String category) async {
     try {
       final response = await _makeRequest(
         'GET',
@@ -87,13 +87,13 @@ class SlidesApiService implements ISlidesApiService {
             .toList();
       } else {
         throw ApiException(
-          'Erro ao buscar slides por categoria: ${response['message']}',
+          'Erro ao buscar challenges por categoria: ${response['message']}',
           response['statusCode'] ?? 500,
         );
       }
     } catch (e) {
       if (Environment.enableLogging) {
-        print('Erro ao buscar slides por categoria: $e');
+        print('Erro ao buscar challenges por categoria: $e');
       }
       rethrow;
     }

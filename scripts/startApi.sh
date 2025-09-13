@@ -182,15 +182,8 @@ else
     warning "Falha ao limpar collection (pode não existir ainda)"
 fi
 
-# Executar script de inicialização
-log "📊 Executando script de inicialização do banco..."
-npm run init-db
-if [ $? -eq 0 ]; then
-    success "Dados inicializados no banco ✓"
-else
-    error "Falha ao inicializar dados no banco"
-    exit 1
-fi
+# Script de inicialização removido - usar apenas banco de dados
+log "📊 Script de inicialização removido - usando apenas banco de dados"
 
 # =============================================================================
 # 6. INICIALIZAÇÃO DA API

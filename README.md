@@ -86,7 +86,7 @@ meu_jogo/
 O projeto usa MongoDB com:
 - **Banco**: `lumo`
 - **Collection**: `slides`
-- **Dados**: Inicializados automaticamente do arquivo `api/data/slides.json`
+- **Dados**: Usar apenas banco de dados (sem arquivos JSON)
 
 ## 📝 Logs
 
@@ -121,7 +121,7 @@ pkill -f "flutter run"
 ### Estrutura API
 - `src/routes/` - Rotas da API
 - `src/models/` - Modelos Mongoose
-- `src/scripts/` - Scripts de inicialização
+- `src/scripts/` - (removido) - Scripts de inicialização removidos
 - `data/` - Dados de inicialização
 
 ## 📚 Documentação Adicional

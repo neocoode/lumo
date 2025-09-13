@@ -54,7 +54,7 @@ meu_jogo/
 │   │   ├── routes/        # Rotas da API
 │   │   ├── models/        # Modelos do banco
 │   │   ├── config/        # Configurações
-│   │   └── scripts/       # Scripts utilitários
+│   │   └── scripts/       # (removido) - Scripts utilitários removidos
 │   └── package.json
 ├── assets/                # Assets do Flutter
 ├── startDev.sh           # Script Linux/macOS

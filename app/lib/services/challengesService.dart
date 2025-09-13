@@ -1,19 +1,19 @@
 import 'dart:async';
 import '../models/apiModels.dart';
-import 'slidesApiService.dart';
+import 'challengesApiService.dart';
 import 'fallbackService.dart';
 
-class SlidesService implements ISlidesApiService {
-  final ISlidesApiService _apiService;
+class ChallengesService implements IChallengesApiService {
+  final IChallengesApiService _apiService;
   final FallbackService _fallbackService;
   bool _isApiAvailable = true;
   Timer? _healthCheckTimer;
   String? _lastError;
 
-  SlidesService({
-    ISlidesApiService? apiService,
+  ChallengesService({
+    IChallengesApiService? apiService,
     FallbackService? fallbackService,
-  })  : _apiService = apiService ?? SlidesApiService(),
+  })  : _apiService = apiService ?? ChallengesApiService(),
         _fallbackService = fallbackService ?? FallbackService() {
     _startHealthCheck();
   }
@@ -43,24 +43,24 @@ class SlidesService implements ISlidesApiService {
     }
   }
 
-  ISlidesApiService get _currentService =>
+  IChallengesApiService get _currentService =>
       _isApiAvailable ? _apiService : _fallbackService;
 
   @override
-  Future<ISlideCollectionDocument> getSlides() async {
+  Future<ISlideCollectionDocument> getChallenges() async {
     if (!_isApiAvailable) {
       throw Exception(
-          'API indisponível. Use getOfflineSlides() para dados offline.');
+          'API indisponível. Use getOfflineChallenges() para dados offline.');
     }
 
     try {
-      return await _apiService.getSlides();
+      return await _apiService.getChallenges();
     } catch (e) {
       print('Erro na API: $e');
       _isApiAvailable = false;
       _lastError = e.toString();
       throw Exception(
-          'API indisponível. Use getOfflineSlides() para dados offline.');
+          'API indisponível. Use getOfflineChallenges() para dados offline.');
     }
   }
 
@@ -79,14 +79,14 @@ class SlidesService implements ISlidesApiService {
   }
 
   @override
-  Future<List<ISlideData>> getSlidesByCategory(String category) async {
+  Future<List<ISlideData>> getChallengesByCategory(String category) async {
     try {
-      return await _currentService.getSlidesByCategory(category);
+      return await _currentService.getChallengesByCategory(category);
     } catch (e) {
       if (_isApiAvailable) {
         print('Erro na API, tentando fallback: $e');
         _isApiAvailable = false;
-        return await _fallbackService.getSlidesByCategory(category);
+        return await _fallbackService.getChallengesByCategory(category);
       }
       rethrow;
     }
@@ -171,16 +171,16 @@ class SlidesService implements ISlidesApiService {
   }
 
   // Métodos para dados offline
-  Future<ISlideCollectionDocument> getOfflineSlides() async {
-    return await _fallbackService.getSlides();
+  Future<ISlideCollectionDocument> getOfflineChallenges() async {
+    return await _fallbackService.getChallenges();
   }
 
   Future<List<String>> getOfflineCategories() async {
     return await _fallbackService.getCategories();
   }
 
-  Future<List<ISlideData>> getOfflineSlidesByCategory(String category) async {
-    return await _fallbackService.getSlidesByCategory(category);
+  Future<List<ISlideData>> getOfflineChallengesByCategory(String category) async {
+    return await _fallbackService.getChallengesByCategory(category);
   }
 
   Future<ISlideData?> getOfflineSlideByIndex(int index) async {
@@ -189,8 +189,8 @@ class SlidesService implements ISlidesApiService {
 
   void dispose() {
     _healthCheckTimer?.cancel();
-    if (_apiService is SlidesApiService) {
-      (_apiService as SlidesApiService).dispose();
+    if (_apiService is ChallengesApiService) {
+      (_apiService as ChallengesApiService).dispose();
     }
   }
 }

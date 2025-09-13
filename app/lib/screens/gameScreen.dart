@@ -3,7 +3,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:confetti/confetti.dart';
 import 'package:provider/provider.dart';
 import '../models/apiModels.dart';
-import '../stores/slidesStore.dart';
+import '../stores/challengesStore.dart';
 import 'resultScreen.dart';
 
 class GameScreen extends StatefulWidget {
@@ -88,8 +88,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   void _answerQuestion(int answer) async {
     if (selectedAnswer != null) return;
 
-    final slidesStore = context.read<SlidesStore>();
-    final question = slidesStore.currentQuestionObj!;
+    final challengesStore = context.read<ChallengesStore>();
+    final question = challengesStore.currentQuestionObj!;
     final answerText = question.options[answer];
 
     setState(() {
@@ -97,8 +97,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       showingExplanation = true;
     });
 
-    // Register answer in SlidesStore
-    await slidesStore.answerQuestion(answer);
+    // Register answer in ChallengesStore
+    await challengesStore.answerQuestion(answer);
 
     _buttonController.forward().then((_) {
       _buttonController.reverse();
@@ -117,10 +117,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   void _nextQuestion() async {
-    final slidesStore = context.read<SlidesStore>();
+    final challengesStore = context.read<ChallengesStore>();
 
-    if (slidesStore.hasNextQuestion) {
-      slidesStore.nextQuestion();
+    if (challengesStore.hasNextQuestion) {
+      challengesStore.nextQuestion();
       setState(() {
         selectedAnswer = null;
         showingExplanation = false;
@@ -130,7 +130,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       _progressController.forward();
       _imageController.forward();
     } else {
-      await slidesStore.finishGame();
+      await challengesStore.finishGame();
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -153,10 +153,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SlidesStore>(
-      builder: (context, slidesStore, child) {
-        if (!slidesStore.gameStarted ||
-            slidesStore.currentQuestionObj == null) {
+    return Consumer<ChallengesStore>(
+      builder: (context, challengesStore, child) {
+        if (!challengesStore.gameStarted ||
+            challengesStore.currentQuestionObj == null) {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
@@ -164,9 +164,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           );
         }
 
-        final question = slidesStore.currentQuestionObj!;
+        final question = challengesStore.currentQuestionObj!;
         final progress =
-            (slidesStore.currentQuestion + 1) / slidesStore.totalQuestions;
+            (challengesStore.currentQuestion + 1) / challengesStore.totalQuestions;
 
         return Scaffold(
           body: Stack(
@@ -176,10 +176,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: slidesStore.currentBackgroundColor != null
+                    colors: challengesStore.currentBackgroundColor != null
                         ? [
-                            slidesStore.currentBackgroundColor!,
-                            slidesStore.currentBackgroundColor!
+                            challengesStore.currentBackgroundColor!,
+                            challengesStore.currentBackgroundColor!
                                 .withOpacity(0.7),
                           ]
                         : [
@@ -191,7 +191,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 child: SafeArea(
                   child: Column(
                     children: [
-                      _buildHeader(progress, slidesStore),
+                      _buildHeader(progress, challengesStore),
                       const SizedBox(height: 20),
                       // Área expansível para pergunta e imagem
                       Expanded(
@@ -234,7 +234,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildHeader(double progress, SlidesStore slidesStore) {
+  Widget _buildHeader(double progress, ChallengesStore challengesStore) {
     return Column(
       children: [
         Row(
@@ -245,7 +245,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               icon: const Icon(Icons.arrow_back, color: Colors.white),
             ),
             Text(
-              'Pergunta ${slidesStore.currentQuestion + 1} de ${slidesStore.totalQuestions}',
+              'Pergunta ${challengesStore.currentQuestion + 1} de ${challengesStore.totalQuestions}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -259,7 +259,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                '${slidesStore.score} pts',
+                '${challengesStore.score} pts',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
