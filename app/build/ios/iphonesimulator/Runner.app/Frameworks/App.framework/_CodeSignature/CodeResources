@@ -6,7 +6,7 @@
 	<dict>
 		<key>Info.plist</key>
 		<data>
-		h5OB7aKzS5WR9SemvZAyN6FEkJs=
+		T7ae0s1yqPVdrLK0y5gqABVb1PU=
 		</data>
 		<key>flutter_assets/AssetManifest.bin</key>
 		<data>
@@ -46,11 +46,11 @@
 		</data>
 		<key>flutter_assets/isolate_snapshot_data</key>
 		<data>
-		wfMZXW4WDbU/feCTp08dh+q7SKY=
+		UG9REdNWKhnewZcLDmaba6Vrbv8=
 		</data>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<data>
-		kUWDjsWDCPkTmgnY833Mc4shG5k=
+		ynQgxjZ7m/3pI2CYVcRm2JmWh5E=
 		</data>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
@@ -134,14 +134,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			y3IETU0f7aPVGlpyw59O5lGbzyZ9Ro7gfazfyi9v0bU=
+			6mKFSs5ej8/5vIXY96Mp8qbiQ2fXKtHSuAwALWkzx1c=
 			</data>
 		</dict>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			OlMroGDBhTLsCQleUfSk0QZGBXNtVeW8SI3ZF20D4a8=
+			acrYm2MSi1RHr4qMnuGRXt/hJAGpq3s+HYX0eH5aTH0=
 			</data>
 		</dict>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>

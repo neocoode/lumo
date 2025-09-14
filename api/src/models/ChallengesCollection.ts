@@ -1,31 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
-
-// Interface para configuração de slide individual
-export interface ISlideConfig {
-  activeIndex: number;
-  selectedAnswer?: number;
-  wasAnswered?: boolean;
-}
-
-// Interface para metadados do quiz
-export interface IQuizMetadata {
-  title: string;
-  description: string;
-  createdAt: Date;
-  updatedAt: Date;
-  difficulty?: string;
-  author?: string;
-}
-
-// Interface para configurações dos slides
-export interface ISlideConfigs {
-  slides: ISlideConfig[];
-  totalCorrect: number;
-  totalWrong: number;
-  totalQuestions: number;
-  totalAnswered: number;
-  accuracyPercent: number;
-}
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 // Interface para pergunta
 export interface ISlideQuestion {
@@ -39,85 +12,39 @@ export interface ISlideQuestion {
 
 // Interface para slide individual
 export interface ISlideData {
-  backgroundImage: string;
-  backgroundColor: {
-    value: number;
-    hex: string;
+  configs: {
+    slideTime: number;
+    allowSkip: boolean;
+    showExplanation: boolean;
+    difficulty: string;
+    backgroundImage: string;
+    backgroundColor: {
+      value: number;
+      hex: string;
+    };
   };
   question: ISlideQuestion;
 }
 
 // Interface principal do documento
 export interface ISlideCollectionDocument extends Document {
+  userId: Types.ObjectId;
   configs: {
-    empty: ISlideConfigs;
-    withAnswers: ISlideConfigs;
     title: string;
     description: string;
     date: Date;
     updatedAt: Date;
+    // Configurações gerais do challenge
+    slideTime?: number;
+    totalTime?: number;
+    allowSkip?: boolean;
+    showExplanation?: boolean;
+    randomizeQuestions?: boolean;
+    difficulty?: string;
   };
   data: ISlideData[];
   categories: string[];
 }
-
-// Schema para configuração de slide
-const SlideConfigSchema = new Schema<ISlideConfig>(
-  {
-    activeIndex: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    selectedAnswer: {
-      type: Number,
-      min: 0,
-      max: 3,
-    },
-    wasAnswered: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  { _id: false }
-);
-
-// Schema para configurações dos slides
-const SlideConfigsSchema = new Schema<ISlideConfigs>(
-  {
-    slides: {
-      type: [SlideConfigSchema],
-      required: true,
-    },
-    totalCorrect: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    totalWrong: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    totalQuestions: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    totalAnswered: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    accuracyPercent: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100,
-    },
-  },
-  { _id: false }
-);
 
 // Schema para pergunta
 const QuestionSchema = new Schema<ISlideQuestion>(
@@ -173,21 +100,42 @@ const QuestionSchema = new Schema<ISlideQuestion>(
 // Schema para slide individual
 const SlideDataSchema = new Schema<ISlideData>(
   {
-    backgroundImage: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    backgroundColor: {
-      value: {
+    configs: {
+      slideTime: {
         type: Number,
-        required: true,
+        default: 30,
+        min: 5,
+        max: 300,
       },
-      hex: {
+      allowSkip: {
+        type: Boolean,
+        default: true,
+      },
+      showExplanation: {
+        type: Boolean,
+        default: true,
+      },
+      difficulty: {
+        type: String,
+        enum: ["easy", "medium", "hard"],
+        default: "medium",
+      },
+      backgroundImage: {
         type: String,
         required: true,
-        match: /^#[0-9A-F]{6}$/i,
-        message: "Cor deve estar no formato hexadecimal (#RRGGBB)",
+        trim: true,
+      },
+      backgroundColor: {
+        value: {
+          type: Number,
+          required: true,
+        },
+        hex: {
+          type: String,
+          required: true,
+          match: /^#[0-9A-F]{6}$/i,
+          message: "Cor deve estar no formato hexadecimal (#RRGGBB)",
+        },
       },
     },
     question: {
@@ -201,15 +149,12 @@ const SlideDataSchema = new Schema<ISlideData>(
 // Schema principal da collection
 const SlidesCollectionSchema = new Schema<ISlideCollectionDocument>(
   {
+    userId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
     configs: {
-      empty: {
-        type: SlideConfigsSchema,
-        required: true,
-      },
-      withAnswers: {
-        type: SlideConfigsSchema,
-        required: true,
-      },
       title: {
         type: String,
         required: true,
@@ -232,6 +177,36 @@ const SlidesCollectionSchema = new Schema<ISlideCollectionDocument>(
         required: true,
         default: Date.now,
       },
+      // Configurações gerais do challenge
+      slideTime: {
+        type: Number,
+        default: 30,
+        min: 5,
+        max: 300,
+      },
+      totalTime: {
+        type: Number,
+        default: 300,
+        min: 30,
+        max: 3600,
+      },
+      allowSkip: {
+        type: Boolean,
+        default: true,
+      },
+      showExplanation: {
+        type: Boolean,
+        default: true,
+      },
+      randomizeQuestions: {
+        type: Boolean,
+        default: false,
+      },
+      difficulty: {
+        type: String,
+        enum: ["easy", "medium", "hard"],
+        default: "medium",
+      },
     },
     data: {
       type: [SlideDataSchema],
@@ -247,8 +222,9 @@ const SlidesCollectionSchema = new Schema<ISlideCollectionDocument>(
   }
 );
 
-export const ChallengesCollectionModel = mongoose.model<ISlideCollectionDocument>(
-  "ChallengesCollection",
-  SlidesCollectionSchema,
-  "challenges"
-);
+export const ChallengesCollectionModel =
+  mongoose.model<ISlideCollectionDocument>(
+    "ChallengesCollection",
+    SlidesCollectionSchema,
+    "challenges"
+  );

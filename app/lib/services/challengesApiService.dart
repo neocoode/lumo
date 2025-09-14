@@ -6,6 +6,7 @@ import '../models/apiModels.dart';
 
 abstract class IChallengesApiService {
   Future<ISlideCollectionDocument> getChallenges();
+  Future<List<ISlideCollectionDocument>> getUserChallenges();
   Future<List<String>> getCategories();
   Future<List<ISlideData>> getChallengesByCategory(String category);
   Future<ISlideData?> getSlideByIndex(int index);
@@ -14,6 +15,7 @@ abstract class IChallengesApiService {
   Future<bool> updateSlideAnswer(int index, int answer);
   Future<Map<String, dynamic>> getStats();
   Future<ISlideCollectionDocument> getChallengeById(String id);
+  Future<ISlideCollectionDocument> getStudioQuizPreview(String id);
 }
 
 class ChallengesApiService implements IChallengesApiService {
@@ -45,6 +47,33 @@ class ChallengesApiService implements IChallengesApiService {
     } catch (e) {
       if (Environment.enableLogging) {
         print('Erro ao buscar challenges: $e');
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<ISlideCollectionDocument>> getUserChallenges() async {
+    try {
+      final response = await _makeRequest(
+        'GET',
+        '/api/challenges',
+      );
+
+      if (response['success'] == true) {
+        final List<dynamic> challengesData = response['data'];
+        return challengesData
+            .map((data) => ISlideCollectionDocument.fromJson(data))
+            .toList();
+      } else {
+        throw ApiException(
+          'Erro ao buscar challenges do usuário: ${response['message']}',
+          response['statusCode'] ?? 500,
+        );
+      }
+    } catch (e) {
+      if (Environment.enableLogging) {
+        print('Erro ao buscar challenges do usuário: $e');
       }
       rethrow;
     }
@@ -240,6 +269,37 @@ class ChallengesApiService implements IChallengesApiService {
     } catch (e) {
       if (Environment.enableLogging) {
         print('Erro ao buscar challenge por ID: $e');
+      }
+      rethrow;
+    }
+  }
+
+  Future<ISlideCollectionDocument> getStudioQuizPreview(String id) async {
+    try {
+      print('🔄 Fazendo requisição para preview do quiz: $id');
+      
+      final response = await _makeRequest(
+        'GET',
+        '${Environment.apiUrl}/studio/preview/$id?authorId=anonymous',
+      );
+
+      print('📊 Resposta recebida: ${response['success']}');
+      print('📊 Dados da resposta: ${response['data']}');
+
+      if (response['success'] == true) {
+        print('🔄 Convertendo dados para ISlideCollectionDocument...');
+        final result = ISlideCollectionDocument.fromJson(response['data']);
+        print('✅ Conversão concluída com sucesso');
+        return result;
+      } else {
+        throw ApiException(
+          'Erro ao buscar preview do quiz: ${response['message']}',
+          response['statusCode'] ?? 500,
+        );
+      }
+    } catch (e) {
+      if (Environment.enableLogging) {
+        print('Erro ao buscar preview do quiz do studio: $e');
       }
       rethrow;
     }

@@ -1,14 +1,14 @@
 class Environment {
-  static const String _baseUrl = 'http://localhost:3000';
-  static const String _apiPath = '/api/challenge';
+  static const String _baseUrl = 'http://192.168.3.109:3000';
+  static const String _apiPath = '/api';
 
   // URLs da API
   static String get baseUrl => _baseUrl;
   static String get apiUrl => '$_baseUrl$_apiPath';
 
   // Endpoints específicos
-  static String get challengesEndpoint => apiUrl;
-  static String get categoriesEndpoint => '$apiUrl/categories';
+  static String get challengesEndpoint => '$apiUrl/challenges';
+  static String get categoriesEndpoint => '$apiUrl/challenges/categories';
   static String get categoryEndpoint => '$apiUrl/category';
   static String get slideEndpoint => '$apiUrl/slide';
   static String get configsEmptyEndpoint => '$apiUrl/configs/empty';

@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 import '../config/environment.dart';
 import '../models/apiModels.dart';
+import '../stores/sessionStore.dart';
 
 // Modelo para challenge individual (cada slide é um challenge)
 class ChallengeItem {
@@ -102,18 +105,33 @@ class ChallengesListResponse {
 
   factory ChallengesListResponse.fromJson(dynamic json) {
     print('📊 Processando JSON no fromJson: $json');
+    print('📊 Tipo do JSON: ${json.runtimeType}');
     
     // Se é uma lista de challenges (nova API)
     if (json is List) {
       print('📊 Lista de challenges recebida: ${json.length} items');
       
       final challenges = json.map((challengeJson) {
+        print('📊 Processando challenge: ${challengeJson['_id']} - ${challengeJson['configs']?['title']}');
+        
+        // Extrair categorias dos dados
+        List<String> categories = ['geography']; // Default
+        if (challengeJson['categories'] != null && challengeJson['categories'] is List) {
+          try {
+            categories = (challengeJson['categories'] as List).map<String>((c) => c.toString()).toList();
+            print('📊 Categorias extraídas: $categories');
+          } catch (e) {
+            print('⚠️ Erro ao extrair categorias: $e');
+            categories = ['geography'];
+          }
+        }
+        
         return ChallengeItem(
           id: challengeJson['_id'] ?? challengeJson['id'] ?? '',
-          title: challengeJson['configs']?['title'] ?? challengeJson['title'] ?? 'Challenge',
-          description: challengeJson['configs']?['description'] ?? challengeJson['description'] ?? 'Descrição do challenge',
-          category: _parseCategoria(challengeJson['categories']?[0] ?? 'geography'),
-          questionCount: challengeJson['data']?.length ?? challengeJson['questionCount'] ?? 0,
+          title: challengeJson['configs']?['title'] ?? 'Challenge',
+          description: challengeJson['configs']?['description'] ?? 'Descrição do challenge',
+          category: _parseCategoria(categories.isNotEmpty ? categories[0] : 'geography'),
+          questionCount: challengeJson['data']?.length ?? 0,
           backgroundImage: 'assets/images/default.svg',
           backgroundColor: '#667eea',
           difficulty: challengeJson['configs']?['difficulty'] ?? 'Médio',
@@ -125,6 +143,7 @@ class ChallengesListResponse {
       }).toList();
 
       print('📊 ${challenges.length} challenges processados');
+      print('📊 IDs dos challenges: ${challenges.map((c) => c.id).toList()}');
       
       return ChallengesListResponse(
         challenges: challenges,
@@ -135,8 +154,10 @@ class ChallengesListResponse {
     
     // Se é um único objeto (formato antigo)
     if (json is Map<String, dynamic>) {
+      print('📊 Processando objeto único (formato antigo)');
       // Verificar se é dados completos do banco (com configs) ou dados processados
       if (json.containsKey('configs') && json.containsKey('data')) {
+        print('📊 Dados completos do banco detectados');
       // Dados completos do banco - criar UM challenge que representa todo o conjunto
       final fullData = ISlideCollectionDocument.fromJson(json);
       print('📊 Dados completos recebidos: ${fullData.data.length} slides');
@@ -175,6 +196,7 @@ class ChallengesListResponse {
         categories: fullData.categories,
       );
     } else {
+      print('📊 Dados processados (formato antigo) detectados');
       // Dados processados (formato antigo) - manter compatibilidade
       final challenge = ChallengeItem(
         id: json['id'] ?? '',
@@ -203,6 +225,7 @@ class ChallengesListResponse {
     
     // Fallback
     print('📊 Fallback: nenhum formato reconhecido');
+    print('📊 JSON recebido: $json');
     return ChallengesListResponse(
       challenges: [],
       total: 0,
@@ -238,14 +261,15 @@ class ChallengesListService {
     http.Client? client,
     String? baseUrl,
   })  : _client = client ?? http.Client(),
-        _baseUrl = baseUrl ?? Environment.apiUrl;
+        _baseUrl = baseUrl ?? Environment.challengesEndpoint;
 
   // Listar dados do challenge (config)
-  Future<ChallengesListResponse> getChallengesList() async {
+  Future<ChallengesListResponse> getChallengesList([BuildContext? context]) async {
     try {
       final response = await _makeRequest(
         'GET',
         '',
+        context: context,
       );
 
       if (response['success'] == true) {
@@ -260,66 +284,20 @@ class ChallengesListService {
     } catch (e) {
       print('Erro ao buscar lista de challenges: $e');
       // Fallback: converter dados completos para lista de challenges
-      return await _getFallbackChallengesList();
+      return await _getFallbackChallengesList(context);
     }
   }
 
   // Fallback: converter dados completos para lista de challenges
-  Future<ChallengesListResponse> _getFallbackChallengesList() async {
+  Future<ChallengesListResponse> _getFallbackChallengesList([BuildContext? context]) async {
     try {
-      final response = await _makeRequest(
-        'GET',
-        '',
+      // No fallback, vamos retornar uma lista vazia em vez de fazer outra requisição
+      print('📊 Fallback: retornando lista vazia');
+      return ChallengesListResponse(
+        challenges: [],
+        total: 0,
+        categories: [],
       );
-
-      if (response['success'] == true) {
-        final fullData = ISlideCollectionDocument.fromJson(response['data']);
-        print('📊 Dados completos recebidos no fallback: ${fullData.data.length} slides');
-        
-        // Converter cada slide para um challenge individual usando metadados do configs
-        final challenges = fullData.data.asMap().entries.map((entry) {
-          final index = entry.key;
-          final slide = entry.value;
-          final question = slide.question;
-          
-          return ChallengeItem(
-            id: 'challenge_$index',
-            title: fullData.title,
-            description: fullData.description,
-            category: question.category,
-            questionCount: 1, // Cada slide tem 1 pergunta
-            backgroundImage: slide.backgroundImage,
-            backgroundColor: slide.backgroundColor,
-            difficulty: 'Médio', // Valor padrão - deve vir do banco
-            author: 'Sistema',
-            createdAt: fullData.date,
-            updatedAt: fullData.updatedAt ?? DateTime.now(),
-            slideData: {
-              'backgroundImage': slide.backgroundImage,
-              'backgroundColor': slide.backgroundColor,
-              'question': {
-                'question': question.question,
-                'options': question.options,
-                'correctAnswer': question.correctAnswer,
-                'explanation': question.explanation,
-                'category': question.category.name,
-                'imagePath': question.imagePath,
-              }
-            },
-          );
-        }).toList();
-
-        print('📊 Challenges criados no fallback: ${challenges.length}');
-        print('📊 Primeiro challenge: ${challenges.isNotEmpty ? challenges.first.title : 'Nenhum'}');
-        
-        return ChallengesListResponse(
-          challenges: challenges,
-          total: challenges.length,
-          categories: fullData.categories,
-        );
-      } else {
-        throw Exception('Erro ao buscar challenges: ${response['message']}');
-      }
     } catch (e) {
       print('Erro no fallback: $e');
       return ChallengesListResponse(
@@ -337,8 +315,10 @@ class ChallengesListService {
     String method,
     String endpoint, {
     Map<String, dynamic>? body,
+    BuildContext? context,
   }) async {
     final uri = Uri.parse('$_baseUrl$endpoint');
+    print('🌐 Fazendo requisição: $method $_baseUrl$endpoint');
     
     http.Response response;
     
@@ -346,13 +326,13 @@ class ChallengesListService {
       case 'GET':
         response = await _client.get(
           uri,
-          headers: _getHeaders(),
+          headers: _getHeaders(context),
         );
         break;
       case 'POST':
         response = await _client.post(
           uri,
-          headers: _getHeaders(),
+          headers: _getHeaders(context),
           body: body != null ? json.encode(body) : null,
         );
         break;
@@ -360,8 +340,13 @@ class ChallengesListService {
         throw Exception('Método HTTP não suportado: $method');
     }
 
+    print('📡 Resposta recebida: ${response.statusCode}');
+    print('📡 Body: ${response.body}');
+    
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return json.decode(response.body);
+      final decodedResponse = json.decode(response.body);
+      print('📡 Resposta decodificada: $decodedResponse');
+      return decodedResponse;
     } else {
       throw HttpException(
         'Erro HTTP ${response.statusCode}: ${response.body}',
@@ -371,11 +356,26 @@ class ChallengesListService {
   }
 
   // Headers padrão
-  Map<String, String> _getHeaders() {
-    return {
+  Map<String, String> _getHeaders([BuildContext? context]) {
+    final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
+
+    // Adicionar token de autenticação se disponível
+    if (context != null) {
+      try {
+        final sessionStore = Provider.of<SessionStore>(context, listen: false);
+        final accessToken = sessionStore.accessToken;
+        if (accessToken != null && accessToken.isNotEmpty) {
+          headers['Authorization'] = 'Bearer $accessToken';
+        }
+      } catch (e) {
+        print('Erro ao obter token de autenticação: $e');
+      }
+    }
+
+    return headers;
   }
 
   // Fechar cliente HTTP

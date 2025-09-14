@@ -4,6 +4,7 @@ import 'screens/mainScreen.dart';
 import 'stores/challengesStore.dart';
 import 'stores/studioStore.dart';
 import 'stores/sessionStore.dart';
+import 'stores/onlineStore.dart';
 
 void main() {
   runApp(const MeuJogoApp());
@@ -19,6 +20,7 @@ class MeuJogoApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => SessionStore()),
         ChangeNotifierProvider(create: (context) => ChallengesStore()),
         ChangeNotifierProvider(create: (context) => StudioStore()),
+        ChangeNotifierProvider(create: (context) => OnlineStore()),
       ],
       child: MaterialApp(
         title: 'Quiz Game',

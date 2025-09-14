@@ -19,7 +19,6 @@ const SessionSchema = new Schema<ISession>({
     unique: true,
     lowercase: true,
     trim: true,
-    index: { unique: true },
   },
   accessToken: {
     type: String,
@@ -55,9 +54,6 @@ const SessionSchema = new Schema<ISession>({
 });
 
 // Índices
-SessionSchema.index({ email: 1 });
-SessionSchema.index({ accessToken: 1 });
-SessionSchema.index({ refreshToken: 1 });
 SessionSchema.index({ expiresAt: 1 });
 SessionSchema.index({ isActive: 1 });
 

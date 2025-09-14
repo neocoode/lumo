@@ -19,7 +19,6 @@ const UserSchema = new Schema<IUser>({
     unique: true,
     lowercase: true,
     trim: true,
-    index: { unique: true },
   },
   name: {
     type: String,
@@ -55,7 +54,6 @@ const UserSchema = new Schema<IUser>({
 
 // Índices
 UserSchema.index({ email: 1 });
-UserSchema.index({ isActive: 1 });
 
 // Middleware para atualizar updatedAt
 UserSchema.pre("save", function (next) {

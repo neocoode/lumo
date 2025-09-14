@@ -1,13 +1,16 @@
 import express from "express";
 import { ChallengesCollectionModel } from "../models/ChallengesCollection";
+import { authenticateToken, AuthenticatedRequest } from "../middleware/auth";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
-// GET /api/challenges - Listar todos os challenges
-router.get("/", async (req: any, res: any) => {
-  console.log("📋 GET /api/challenges - Listando todos os challenges");
+// GET /api/challenges - Listar challenges do usuário logado
+router.get("/", authenticateToken, async (req: AuthenticatedRequest, res: any) => {
+  console.log("📋 GET /api/challenges - Listando challenges do usuário:", req.user?.id);
   try {
-    const challenges = await ChallengesCollectionModel.find().sort({ 'configs.updatedAt': -1 });
+    const userId = new mongoose.Types.ObjectId(req.user?.id);
+    const challenges = await ChallengesCollectionModel.find({ userId }).sort({ 'configs.updatedAt': -1 });
 
     if (!challenges || challenges.length === 0) {
       return res.status(404).json({
@@ -16,7 +19,7 @@ router.get("/", async (req: any, res: any) => {
       });
     }
 
-    console.log(`✅ ${challenges.length} challenges encontrados`);
+    console.log(`✅ ${challenges.length} challenges encontrados para o usuário ${req.user?.id}`);
     res.json({
       success: true,
       data: challenges,
@@ -291,63 +294,6 @@ router.get("/slide/:index", async (req: any, res: any) => {
   }
 });
 
-// GET /api/challenges/configs/empty - Buscar configuração vazia
-router.get("/configs/empty", async (req: any, res: any) => {
-  console.log("⚙️ GET /api/challenges/configs/empty - Buscando configuração vazia");
-  try {
-    const mainDoc = await ChallengesCollectionModel.findOne();
-
-    if (!mainDoc) {
-      return res.status(404).json({
-        success: false,
-        message: "Documento de challenges não encontrado",
-      });
-    }
-
-    console.log("✅ Configuração vazia encontrada");
-    res.json({
-      success: true,
-      data: mainDoc.configs.empty,
-    });
-  } catch (error) {
-    console.error("❌ Erro ao buscar configuração vazia:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erro ao buscar configuração vazia",
-      error: error instanceof Error ? error.message : "Erro desconhecido",
-    });
-  }
-});
-
-// GET /api/challenges/configs/with-answers - Buscar configuração com respostas
-router.get("/configs/with-answers", async (req: any, res: any) => {
-  console.log(
-    "⚙️ GET /api/challenges/configs/with-answers - Buscando configuração com respostas"
-  );
-  try {
-    const mainDoc = await ChallengesCollectionModel.findOne();
-
-    if (!mainDoc) {
-      return res.status(404).json({
-        success: false,
-        message: "Documento de challenges não encontrado",
-      });
-    }
-
-    console.log("✅ Configuração com respostas encontrada");
-    res.json({
-      success: true,
-      data: mainDoc.configs.withAnswers,
-    });
-  } catch (error) {
-    console.error("❌ Erro ao buscar configuração com respostas:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erro ao buscar configuração com respostas",
-      error: error instanceof Error ? error.message : "Erro desconhecido",
-    });
-  }
-});
 
 // PUT /api/challenges/slide/:index/answer - Atualizar resposta de um slide
 router.put("/slide/:index/answer", async (req: any, res: any) => {
@@ -389,9 +335,9 @@ router.put("/slide/:index/answer", async (req: any, res: any) => {
       });
     }
 
-    // Atualizar a configuração withAnswers
-    const updatePath = `configs.withAnswers.slides.${slideIndex}.selectedAnswer`;
-    const wasAnsweredPath = `configs.withAnswers.slides.${slideIndex}.wasAnswered`;
+    // Atualizar a configuração do slide
+    const updatePath = `configs.slides.${slideIndex}.selectedAnswer`;
+    const wasAnsweredPath = `configs.slides.${slideIndex}.wasAnswered`;
 
     await ChallengesCollectionModel.updateOne(
       {},
@@ -425,7 +371,7 @@ router.put("/slide/:index/answer", async (req: any, res: any) => {
 });
 
 // POST /api/studio/save - Endpoint unificado para criar/editar challenges do Studio
-router.post("/studio/save", async (req: any, res: any) => {
+router.post("/studio/save", authenticateToken, async (req: AuthenticatedRequest, res: any) => {
   console.log("🎨 POST /api/studio/save - Salvando challenge do Studio");
   try {
     const {
@@ -459,11 +405,17 @@ router.post("/studio/save", async (req: any, res: any) => {
     }
 
     // Converter perguntas para o formato esperado
-    const slidesData = questions.map((question: any) => ({
-      backgroundImage: "assets/images/default.svg",
-      backgroundColor: {
-        hex: "#667eea",
-        value: 0x667eea,
+    const slidesData = questions.map((question: any, index: number) => ({
+      configs: {
+        slideTime: question.slideTime || slideTime || 30,
+        allowSkip: question.allowSkip !== undefined ? question.allowSkip : allowSkip,
+        showExplanation: question.showExplanation !== undefined ? question.showExplanation : showExplanation,
+        difficulty: question.difficulty || difficulty || 'medium',
+        backgroundImage: "assets/images/default.svg",
+        backgroundColor: {
+          hex: "#667eea",
+          value: 0x667eea,
+        },
       },
       question: {
         question: question.question || "",
@@ -480,14 +432,15 @@ router.post("/studio/save", async (req: any, res: any) => {
 
     if (isUpdate) {
       // Atualizar challenge existente
-      console.log(`✏️ Atualizando challenge existente: ${id}`);
+      console.log(`✏️ Atualizando challenge existente: ${id} para o usuário: ${req.user?.id}`);
       
-      // Verificar se o challenge existe
-      const existingChallenge = await ChallengesCollectionModel.findById(id);
+      // Verificar se o challenge existe e pertence ao usuário
+      const userId = new mongoose.Types.ObjectId(req.user?.id);
+      const existingChallenge = await ChallengesCollectionModel.findOne({ _id: id, userId });
       if (!existingChallenge) {
         return res.status(404).json({
           success: false,
-          message: "Challenge não encontrado para atualização",
+          message: "Challenge não encontrado ou não pertence ao usuário",
         });
       }
 
@@ -504,20 +457,6 @@ router.post("/studio/save", async (req: any, res: any) => {
           "configs.showExplanation": showExplanation !== undefined ? showExplanation : true,
           "configs.randomizeQuestions": randomizeQuestions !== undefined ? randomizeQuestions : false,
           "configs.difficulty": difficulty || "medium",
-          "configs.empty.slides": slidesData.map(() => ({ activeIndex: 0, selectedAnswer: null })),
-          "configs.empty.totalQuestions": slidesData.length,
-          "configs.empty.totalCorrect": 0,
-          "configs.empty.totalWrong": 0,
-          "configs.empty.totalAnswered": 0,
-          "configs.empty.accuracyPercentage": 0,
-          "configs.empty.accuracyPercent": 0,
-          "configs.withAnswers.slides": slidesData.map(() => ({ activeIndex: 0, selectedAnswer: null, wasAnswered: false })),
-          "configs.withAnswers.totalQuestions": slidesData.length,
-          "configs.withAnswers.totalCorrect": 0,
-          "configs.withAnswers.totalWrong": 0,
-          "configs.withAnswers.totalAnswered": 0,
-          "configs.withAnswers.accuracyPercentage": 0,
-          "configs.withAnswers.accuracyPercent": 0,
           categories: [category],
         },
         { new: true, runValidators: true }
@@ -526,8 +465,9 @@ router.post("/studio/save", async (req: any, res: any) => {
       console.log(`✅ Challenge atualizado com sucesso: ${id}`);
     } else {
       // Criar novo challenge
-      console.log("➕ Criando novo challenge");
+      console.log("➕ Criando novo challenge para o usuário:", req.user?.id);
       const newChallenge = new ChallengesCollectionModel({
+        userId: new mongoose.Types.ObjectId(req.user?.id),
         data: slidesData,
         configs: {
           title: title,
@@ -540,24 +480,6 @@ router.post("/studio/save", async (req: any, res: any) => {
           showExplanation: showExplanation !== undefined ? showExplanation : true,
           randomizeQuestions: randomizeQuestions !== undefined ? randomizeQuestions : false,
           difficulty: difficulty || "medium",
-          empty: {
-            slides: slidesData.map(() => ({ activeIndex: 0, selectedAnswer: null })),
-            totalCorrect: 0,
-            totalWrong: 0,
-            totalQuestions: slidesData.length,
-            totalAnswered: 0,
-            accuracyPercentage: 0,
-            accuracyPercent: 0,
-          },
-          withAnswers: {
-            slides: slidesData.map(() => ({ activeIndex: 0, selectedAnswer: null, wasAnswered: false })),
-            totalCorrect: 0,
-            totalWrong: 0,
-            totalQuestions: slidesData.length,
-            totalAnswered: 0,
-            accuracyPercentage: 0,
-            accuracyPercent: 0,
-          },
         },
         categories: [category],
       });
@@ -661,14 +583,6 @@ router.post("/", async (req: any, res: any) => {
           totalAnswered: 0,
           accuracyPercentage: 0,
         },
-        withAnswers: {
-          slides: slidesData.map(() => ({ activeIndex: 0, selectedAnswer: null, wasAnswered: false })),
-          totalCorrect: 0,
-          totalWrong: 0,
-          totalQuestions: slidesData.length,
-          totalAnswered: 0,
-          accuracyPercentage: 0,
-        },
       },
       categories: [category],
     });
@@ -748,10 +662,6 @@ router.put("/:id", async (req: any, res: any) => {
         "configs.showExplanation": showExplanation !== undefined ? showExplanation : true,
         "configs.randomizeQuestions": randomizeQuestions !== undefined ? randomizeQuestions : false,
         "configs.difficulty": difficulty || "medium",
-        "configs.empty.slides": slidesData.map(() => ({ activeIndex: 0, selectedAnswer: null })),
-        "configs.empty.totalQuestions": slidesData.length,
-        "configs.withAnswers.slides": slidesData.map(() => ({ activeIndex: 0, selectedAnswer: null, wasAnswered: false })),
-        "configs.withAnswers.totalQuestions": slidesData.length,
         categories: [category],
       },
       { new: true, runValidators: true }
@@ -804,6 +714,35 @@ router.get("/:id", async (req: any, res: any) => {
     res.status(500).json({
       success: false,
       message: "Erro ao buscar documento",
+      error: error instanceof Error ? error.message : "Erro desconhecido",
+    });
+  }
+});
+
+// GET /api/categories - Listar categorias disponíveis
+router.get("/categories", async (req: any, res: any) => {
+  console.log("📋 GET /api/categories - Listando categorias disponíveis");
+  try {
+    const categories = [
+      "geography",
+      "science", 
+      "literature",
+      "history",
+      "mathematics",
+      "biology"
+    ];
+
+    console.log(`✅ ${categories.length} categorias encontradas`);
+    res.json({
+      success: true,
+      data: categories,
+      total: categories.length,
+    });
+  } catch (error) {
+    console.error("❌ Erro ao buscar categorias:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro ao buscar categorias",
       error: error instanceof Error ? error.message : "Erro desconhecido",
     });
   }

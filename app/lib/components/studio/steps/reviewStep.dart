@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../stores/studioStore.dart';
+import '../../../models/studioModels.dart';
 
 class ReviewStep extends StatelessWidget {
   const ReviewStep({super.key});
@@ -348,7 +349,7 @@ class ReviewStep extends StatelessWidget {
                   ? () async {
                       if (isLastStep) {
                         // Salvar challenge
-                        final success = await store.saveChallenge();
+                        final success = await store.saveChallenge(context);
                         if (success && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

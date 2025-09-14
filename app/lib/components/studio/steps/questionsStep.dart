@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../stores/studioStore.dart';
+import '../../../models/studioModels.dart';
 import 'questionEditor.dart';
 
 class QuestionsStep extends StatelessWidget {
@@ -340,26 +341,60 @@ class QuestionsStep extends StatelessWidget {
     int? index,
     StudioQuestion? question,
   ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => QuestionEditor(
-        question: question ?? StudioQuestion(
-          question: '',
-          options: ['', '', '', ''],
-          correctAnswer: 0,
-          explanation: '',
-          category: 'geography',
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(question == null ? 'Nova Pergunta' : 'Editar Pergunta'),
+            backgroundColor: Colors.purple,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+          body: QuestionEditor(
+            question: question ?? StudioQuestion(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+              configs: StudioSlideConfig(),
+              data: StudioQuestionData(
+                question: '',
+                options: ['', '', '', ''],
+                correctAnswer: 0,
+                explanation: '',
+                category: parseCategoria('geography'),
+              ),
+            ),
+            onSave: (newQuestion) async {
+              if (index != null) {
+                // Editando pergunta existente
+                store.updateQuestion(index, newQuestion);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pergunta atualizada com sucesso!'),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              } else {
+                // Adicionando nova pergunta
+                store.addQuestionWithData(newQuestion);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pergunta adicionada com sucesso!'),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+              // Aguarda um pouco para mostrar a mensagem antes de fechar
+              await Future.delayed(const Duration(milliseconds: 500));
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+          ),
         ),
-        onSave: (newQuestion) {
-          if (index != null) {
-            store.updateQuestion(index, newQuestion);
-          } else {
-            store.addQuestion();
-            store.updateQuestion(store.questions.length - 1, newQuestion);
-          }
-        },
       ),
     );
   }

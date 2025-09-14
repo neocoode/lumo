@@ -64,6 +64,17 @@ class ChallengesService implements IChallengesApiService {
     }
   }
 
+  // Get user's challenges
+  Future<List<ISlideCollectionDocument>> getUserChallenges() async {
+    try {
+      return await _apiService.getUserChallenges();
+    } catch (e) {
+      print('Erro ao buscar challenges do usuário: $e');
+      _lastError = e.toString();
+      return [];
+    }
+  }
+
   @override
   Future<List<String>> getCategories() async {
     try {
@@ -172,6 +183,16 @@ class ChallengesService implements IChallengesApiService {
         _isApiAvailable = false;
         return await _fallbackService.getChallengeById(id);
       }
+      rethrow;
+    }
+  }
+
+  // Buscar preview de quiz do studio
+  Future<ISlideCollectionDocument> getStudioQuizPreview(String id) async {
+    try {
+      return await _apiService.getStudioQuizPreview(id);
+    } catch (e) {
+      print('Erro ao buscar preview do quiz do studio: $e');
       rethrow;
     }
   }

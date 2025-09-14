@@ -131,7 +131,7 @@ class _StudioScreenState extends State<StudioScreen>
                   AnimatedTextKit(
                     animatedTexts: [
                       FadeAnimatedText(
-                        'Crie seus próprios quizzes personalizados',
+                        'Crie seus próprios desafios personalizados',
                         textStyle: TextStyle(
                           fontSize: 16,
                           color: Colors.white.withOpacity(0.9),
@@ -158,8 +158,8 @@ class _StudioScreenState extends State<StudioScreen>
                               children: [
                                 _buildStudioButton(
                                   icon: Icons.add_circle_outline,
-                                  title: 'Novo Quiz',
-                                  subtitle: 'Criar um quiz do zero',
+                                  title: 'Novo Desafio',
+                                  subtitle: 'Criar um desafio do zero',
                                   onTap: () {
                                     Navigator.push(
                                       context,
@@ -172,9 +172,18 @@ class _StudioScreenState extends State<StudioScreen>
                                 ),
                                 const SizedBox(height: 16),
                                 _buildStudioButton(
+                                  icon: Icons.meeting_room_rounded,
+                                  title: 'Criar Sala',
+                                  subtitle: 'Criar uma sala online para jogar',
+                                  onTap: () {
+                                    Navigator.pushNamed(context, '/online');
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                _buildStudioButton(
                                   icon: Icons.quiz_rounded,
-                                  title: 'Quizzes Disponíveis',
-                                  subtitle: 'Ver e jogar quizzes disponíveis',
+                                  title: 'Desafios Disponíveis',
+                                  subtitle: 'Ver e jogar desafios disponíveis',
                                   onTap: () {
                                     Navigator.push(
                                       context,

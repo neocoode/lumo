@@ -100,9 +100,7 @@ class _StudioEditorScreenState extends State<StudioEditorScreen> {
                         StudioStepContent(),
                         // Step 2: Perguntas
                         StudioStepContent(),
-                        // Step 3: Configurações do Desafio
-                        StudioStepContent(),
-                        // Step 4: Revisão
+                        // Step 3: Revisão
                         StudioStepContent(),
                       ],
                     ),

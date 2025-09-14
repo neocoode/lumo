@@ -1,10 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:provider/provider.dart';
 import 'trainScreen.dart';
 import 'onlineScreen.dart';
 import 'studioScreen.dart';
 import 'menuScreen.dart';
+import '../stores/sessionStore.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -19,14 +21,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late Animation<double> _scaleAnimation;
   late ConfettiController _confettiController;
 
-  final List<Widget> _screens = [
+  // Screens disponíveis
+  final List<Widget> _allScreens = [
     const TrainScreen(),
     const OnlineScreen(),
     const StudioScreen(),
     const MenuScreen(),
   ];
 
-  final List<BottomNavigationItem> _navigationItems = [
+  // Itens de navegação disponíveis
+  final List<BottomNavigationItem> _allNavigationItems = [
     BottomNavigationItem(
       icon: Icons.fitness_center_rounded,
       activeIcon: Icons.fitness_center_rounded,
@@ -56,6 +60,29 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       lottiePath: 'assets/animations/settings.json',
     ),
   ];
+
+  // Getters para screens e itens baseados no status de login
+  List<Widget> get _screens {
+    final sessionStore = context.read<SessionStore>();
+    final isLoggedIn = sessionStore.isAuthenticated();
+    
+    if (isLoggedIn) {
+      return _allScreens; // Todos os screens quando logado
+    } else {
+      return [_allScreens[0], _allScreens[3]]; // Apenas Treinar e Menu quando não logado
+    }
+  }
+
+  List<BottomNavigationItem> get _navigationItems {
+    final sessionStore = context.read<SessionStore>();
+    final isLoggedIn = sessionStore.isAuthenticated();
+    
+    if (isLoggedIn) {
+      return _allNavigationItems; // Todos os itens quando logado
+    } else {
+      return [_allNavigationItems[0], _allNavigationItems[3]]; // Apenas Treinar e Menu quando não logado
+    }
+  }
 
   @override
   void initState() {
@@ -98,13 +125,32 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     }
   }
 
+  // Método para ajustar o índice quando o status de login muda
+  void _adjustIndexForLoginStatus(SessionStore sessionStore) {
+    final isLoggedIn = sessionStore.isAuthenticated();
+    
+    if (!isLoggedIn && _currentIndex > 1) {
+      // Se não está logado e está em Online (1) ou Studio (2), voltar para Treinar (0)
+      setState(() {
+        _currentIndex = 0;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Main content
-          _screens[_currentIndex],
+    return Consumer<SessionStore>(
+      builder: (context, sessionStore, child) {
+        // Ajustar índice se necessário
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _adjustIndexForLoginStatus(sessionStore);
+        });
+
+        return Scaffold(
+          body: Stack(
+            children: [
+              // Main content
+              _screens[_currentIndex],
 
           // Confetti overlay
           Align(
@@ -246,6 +292,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           ),
         ),
       ),
+        );
+      },
     );
   }
 }

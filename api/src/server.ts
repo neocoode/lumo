@@ -9,6 +9,7 @@ import { connectDatabase } from "./config/database";
 import challengesRoutes from "./routes/challenges";
 import studioRoutes from "./routes/studio";
 import authRoutes from "./routes/auth";
+import onlineRoutes from "./routes/online";
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -54,6 +55,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/challenges", challengesRoutes);
 app.use("/api/challenge", challengesRoutes);
 app.use("/api/studio", studioRoutes);
+app.use("/api/online", onlineRoutes);
 
 // Rota de health check
 app.get("/health", (req, res) => {
@@ -76,6 +78,7 @@ app.get("/", (req, res) => {
       challenges: "/api/challenges",
       challenge: "/api/challenge",
       studio: "/api/studio",
+      online: "/api/online",
       health: "/health",
     },
   });

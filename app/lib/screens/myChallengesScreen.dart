@@ -82,7 +82,7 @@ class _MyChallengesScreenState extends State<MyChallengesScreen>
     });
 
     try {
-      final challengesData = await _challengesListService.getChallengesList();
+      final challengesData = await _challengesListService.getChallengesList(context);
       setState(() {
         _challengesData = challengesData;
         _loading = false;
@@ -652,12 +652,12 @@ class _MyChallengesScreenState extends State<MyChallengesScreen>
   }
 
   void _previewChallenge(ChallengeItem challenge) async {
-    // Carregar o challenge específico no store
+    // Carregar o quiz do studio específico no store
     final challengesStore = context.read<ChallengesStore>();
-    await challengesStore.startChallengePreview(challenge.id);
+    await challengesStore.startStudioQuizPreview(challenge.id);
 
     if (context.mounted) {
-      // Navegar para o GameScreen com o challenge carregado
+      // Navegar para o GameScreen com o quiz carregado
       Navigator.push(
         context,
         MaterialPageRoute(

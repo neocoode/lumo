@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import '../stores/challengesStore.dart';
+import '../stores/onlineStore.dart';
+import '../stores/sessionStore.dart';
+import '../models/onlineModels.dart';
 import 'gameScreen.dart';
+import 'studioScreen.dart';
 
 class OnlineScreen extends StatefulWidget {
   const OnlineScreen({super.key});
@@ -194,54 +198,16 @@ class _OnlineScreenState extends State<OnlineScreen>
 
                         const SizedBox(height: 24),
 
-                        // Online challenges
+
+                        // Lista de Salas
                         Expanded(
-                          child: Consumer<ChallengesStore>(
-                            builder: (context, challengesStore, child) {
-                              return ListView(
-                                children: [
-                                  _buildOnlineChallenge(
-                                    title: 'Desafio Diário',
-                                    subtitle: '5 perguntas sobre geografia',
-                                    difficulty: 'Fácil',
-                                    timeLeft: '2h 30min',
-                                    participants: 1247,
-                                    color: const Color(0xFF4CAF50),
-                                    onTap: () => _startOnlineChallenge(
-                                        context, challengesStore, 'daily'),
-                                  ),
-                                  _buildOnlineChallenge(
-                                    title: 'Quiz da Semana',
-                                    subtitle: '10 perguntas mistas',
-                                    difficulty: 'Médio',
-                                    timeLeft: '5d 12h',
-                                    participants: 3421,
-                                    color: const Color(0xFF2196F3),
-                                    onTap: () => _startOnlineChallenge(
-                                        context, challengesStore, 'weekly'),
-                                  ),
-                                  _buildOnlineChallenge(
-                                    title: 'Desafio Especial',
-                                    subtitle: 'História do Brasil',
-                                    difficulty: 'Difícil',
-                                    timeLeft: '1d 8h',
-                                    participants: 892,
-                                    color: const Color(0xFFFF9800),
-                                    onTap: () => _startOnlineChallenge(
-                                        context, challengesStore, 'special'),
-                                  ),
-                                  _buildOnlineChallenge(
-                                    title: 'Quiz Relâmpago',
-                                    subtitle: '3 perguntas em 30 segundos',
-                                    difficulty: 'Extremo',
-                                    timeLeft: '45min',
-                                    participants: 567,
-                                    color: const Color(0xFFE91E63),
-                                    onTap: () => _startOnlineChallenge(
-                                        context, challengesStore, 'lightning'),
-                                  ),
-                                ],
-                              );
+                          child: Consumer2<SessionStore, OnlineStore>(
+                            builder: (context, sessionStore, onlineStore, child) {
+                              if (!sessionStore.isAuthenticated()) {
+                                return _buildLoginRequired();
+                              }
+
+                              return _buildRoomsList(onlineStore);
                             },
                           ),
                         ),
@@ -381,6 +347,385 @@ class _OnlineScreenState extends State<OnlineScreen>
       ),
     );
   }
+
+
+  // Lista de Salas (Minhas + Participando)
+  Widget _buildRoomsList(OnlineStore onlineStore) {
+    return Consumer<OnlineStore>(
+      builder: (context, onlineStore, child) {
+        if (onlineStore.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          );
+        }
+
+        if (onlineStore.error != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.white70,
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  onlineStore.error!,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => onlineStore.refreshAllRooms(),
+                  child: const Text('Tentar Novamente'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final myRooms = onlineStore.activeMyRooms;
+        final participatingRooms = onlineStore.activeParticipatingRooms;
+        final finishedMyRooms = onlineStore.finishedMyRooms;
+        final finishedParticipatingRooms = onlineStore.finishedParticipatingRooms;
+
+        // Combinar todas as salas
+        final allActiveRooms = [...myRooms, ...participatingRooms];
+        final allFinishedRooms = [...finishedMyRooms, ...finishedParticipatingRooms];
+
+        if (allActiveRooms.isEmpty && allFinishedRooms.isEmpty) {
+          return _buildEmptyRoomsCard('Você ainda não tem salas online');
+        }
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              if (allActiveRooms.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Salas Ativas:',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...allActiveRooms.map((room) => _buildRoomCard(room)).toList(),
+                const SizedBox(height: 16),
+              ],
+              
+              if (allFinishedRooms.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Salas Finalizadas:',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...allFinishedRooms.take(5).map((room) => _buildRoomCard(room)).toList(),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+  // Card para criar sala
+  Widget _buildCreateRoomCard() {
+    return GestureDetector(
+      onTap: () {
+        // Navegar para seleção de challenge no Studio
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const StudioScreen(),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF4CAF50),
+              Color(0xFF45A049),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: const Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Criar Nova Sala',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Crie uma sala e convide seus amigos para jogar juntos',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white70,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  // Card de sala
+  Widget _buildRoomCard(GameRoom room) {
+    Color statusColor;
+    IconData statusIcon;
+    
+    if (room.isWaiting) {
+      statusColor = const Color(0xFF2196F3);
+      statusIcon = Icons.access_time;
+    } else if (room.isPlaying) {
+      statusColor = const Color(0xFF4CAF50);
+      statusIcon = Icons.play_circle;
+    } else {
+      statusColor = const Color(0xFF9E9E9E);
+      statusIcon = Icons.check_circle;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4CAF50).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.visibility,
+                    color: Color(0xFF4CAF50),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        room.challengeTitle,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        'Código: ${room.roomCode}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    room.statusText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.people_rounded,
+                  color: Colors.grey[600],
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${room.participantsCount}/${room.maxParticipants}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Icon(
+                  Icons.access_time_rounded,
+                  color: Colors.grey[600],
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  room.timeLeft,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Card quando não há salas
+  Widget _buildEmptyRoomsCard(String message) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.meeting_room_outlined,
+              color: Colors.white70,
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Tela quando não está logado
+  Widget _buildLoginRequired() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.login_rounded,
+              color: Colors.white70,
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Login Necessário',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Faça login para criar e participar de salas online',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   void _startOnlineChallenge(BuildContext context,
       ChallengesStore challengesStore, String challengeType) async {

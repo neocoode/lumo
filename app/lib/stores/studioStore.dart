@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/environment.dart';
 import '../models/apiModels.dart';
+import '../models/studioModels.dart';
 import '../services/challengesListService.dart';
+import '../services/studioApiService.dart';
 
 class StudioStore extends ChangeNotifier {
   // Estados do store
@@ -59,9 +61,7 @@ class StudioStore extends ChangeNotifier {
         return _title.isNotEmpty && _description.isNotEmpty;
       case 1: // Perguntas
         return _questions.isNotEmpty && _questions.every((q) => q.isValid);
-      case 2: // Configurações do desafio
-        return _slideTime > 0 && _totalTime > 0;
-      case 3: // Revisão
+      case 2: // Revisão
         return true;
       default:
         return false;
@@ -93,12 +93,6 @@ class StudioStore extends ChangeNotifier {
         title: 'Perguntas',
         description: 'Adicione e configure as perguntas do challenge',
         icon: Icons.quiz_rounded,
-      ),
-      StudioStep(
-        id: 'challenge_config',
-        title: 'Configurações do Desafio',
-        description: 'Configure tempo e comportamento do challenge',
-        icon: Icons.timer_rounded,
       ),
       StudioStep(
         id: 'review',
@@ -221,12 +215,28 @@ class StudioStore extends ChangeNotifier {
   // Gerenciar perguntas
   void addQuestion() {
     _questions.add(StudioQuestion(
-      question: 'Nova pergunta',
-      options: ['Opção A', 'Opção B', '', ''],
-      correctAnswer: 0,
-      explanation: 'Explicação da resposta correta',
-      category: _category,
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      configs: StudioSlideConfig(
+        slideTime: 30,
+        allowSkip: true,
+        showExplanation: true,
+        difficulty: 'medium',
+      ),
+      data: StudioQuestionData(
+        question: 'Nova pergunta',
+        options: ['Opção A', 'Opção B', '', ''],
+        correctAnswer: 0,
+        explanation: 'Explicação da resposta correta',
+        category: parseCategoria(_category),
+      ),
     ));
+    notifyListeners();
+  }
+
+  void addQuestionWithData(StudioQuestion question) {
+    _questions.add(question);
     notifyListeners();
   }
 
@@ -244,6 +254,32 @@ class StudioStore extends ChangeNotifier {
     }
   }
 
+  void updateQuestionConfig(int index, {
+    int? slideTime,
+    bool? allowSkip,
+    bool? showExplanation,
+    String? difficulty,
+  }) {
+    if (index >= 0 && index < _questions.length) {
+      final question = _questions[index];
+      _questions[index] = StudioQuestion(
+        id: question.id,
+        createdAt: question.createdAt,
+        updatedAt: DateTime.now(),
+        configs: StudioSlideConfig(
+          slideTime: slideTime ?? question.configs.slideTime,
+          allowSkip: allowSkip ?? question.configs.allowSkip,
+          showExplanation: showExplanation ?? question.configs.showExplanation,
+          difficulty: difficulty ?? question.configs.difficulty,
+          backgroundImage: question.configs.backgroundImage,
+          backgroundColor: question.configs.backgroundColor,
+        ),
+        data: question.data,
+      );
+      notifyListeners();
+    }
+  }
+
   void reorderQuestions(int oldIndex, int newIndex) {
     if (oldIndex < newIndex) {
       newIndex -= 1;
@@ -254,7 +290,7 @@ class StudioStore extends ChangeNotifier {
   }
 
   // Salvar challenge
-  Future<bool> saveChallenge() async {
+  Future<bool> saveChallenge([BuildContext? context]) async {
     if (!canSaveChallenge) {
       _error = 'Dados incompletos para salvar o challenge';
       notifyListeners();
@@ -266,7 +302,7 @@ class StudioStore extends ChangeNotifier {
 
     try {
       final challengeData = _buildChallengeData();
-      final success = await _saveToApi(challengeData);
+      final success = await _saveToApi(challengeData, context);
       
       if (success) {
         // Limpar dados após salvar
@@ -308,42 +344,27 @@ class StudioStore extends ChangeNotifier {
     return data;
   }
 
-  Future<bool> _saveToApi(Map<String, dynamic> data) async {
+  Future<bool> _saveToApi(Map<String, dynamic> data, [BuildContext? context]) async {
     try {
-      final url = '${Environment.apiUrl}/studio/save';
-      print('🚀 Enviando dados para: $url');
+      final studioApiService = StudioApiService();
+      final studioQuiz = StudioQuiz.fromJson(data);
+      
+      print('🚀 Enviando dados para API via StudioApiService');
       print('📦 Dados enviados: ${jsonEncode(data)}');
       
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(data),
-      );
-
-      print('📡 Resposta recebida: ${response.statusCode}');
-      print('📄 Corpo da resposta: ${response.body}');
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final responseData = jsonDecode(response.body);
-        if (responseData['success'] == true) {
-          print('✅ Challenge salvo com sucesso: ${responseData['data']['id']}');
-          return true;
-        } else {
-          _error = responseData['message'] ?? 'Erro ao salvar challenge';
-          print('❌ Erro na resposta: $_error');
-          return false;
-        }
+      final success = await studioApiService.saveQuiz(studioQuiz, context);
+      
+      if (success) {
+        print('✅ Challenge salvo com sucesso via StudioApiService');
+        return true;
       } else {
-        final responseData = jsonDecode(response.body);
-        _error = responseData['message'] ?? 'Erro na API: ${response.statusCode}';
-        print('❌ Erro HTTP: $_error');
+        print('❌ Erro ao salvar challenge via StudioApiService');
+        _error = 'Erro ao salvar challenge';
         return false;
       }
     } catch (e) {
-      _error = 'Erro de conexão: $e';
-      print('❌ Erro de conexão: $_error');
+      print('❌ Erro ao salvar challenge: $e');
+      _error = 'Erro ao salvar challenge: $e';
       return false;
     }
   }
@@ -357,18 +378,40 @@ class StudioStore extends ChangeNotifier {
   List<StudioQuestion> _generateSampleQuestions() {
     return [
       StudioQuestion(
-        question: 'Qual é a capital do Brasil?',
-        options: ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador'],
-        correctAnswer: 2,
-        explanation: 'Brasília é a capital federal do Brasil desde 1960.',
-        category: 'geography',
+        id: '1',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        configs: StudioSlideConfig(
+          slideTime: 30,
+          allowSkip: true,
+          showExplanation: true,
+          difficulty: 'medium',
+        ),
+        data: StudioQuestionData(
+          question: 'Qual é a capital do Brasil?',
+          options: ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador'],
+          correctAnswer: 2,
+          explanation: 'Brasília é a capital federal do Brasil desde 1960.',
+          category: parseCategoria('geography'),
+        ),
       ),
       StudioQuestion(
-        question: 'Quem descobriu o Brasil?',
-        options: ['Cristóvão Colombo', 'Pedro Álvares Cabral', 'Vasco da Gama', 'Fernão de Magalhães'],
-        correctAnswer: 1,
-        explanation: 'Pedro Álvares Cabral chegou ao Brasil em 22 de abril de 1500.',
-        category: 'history',
+        id: '2',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        configs: StudioSlideConfig(
+          slideTime: 45,
+          allowSkip: false,
+          showExplanation: true,
+          difficulty: 'hard',
+        ),
+        data: StudioQuestionData(
+          question: 'Quem descobriu o Brasil?',
+          options: ['Cristóvão Colombo', 'Pedro Álvares Cabral', 'Vasco da Gama', 'Fernão de Magalhães'],
+          correctAnswer: 1,
+          explanation: 'Pedro Álvares Cabral chegou ao Brasil em 22 de abril de 1500.',
+          category: parseCategoria('history'),
+        ),
       ),
     ];
   }
@@ -387,50 +430,4 @@ class StudioStep {
     required this.description,
     required this.icon,
   });
-}
-
-class StudioQuestion {
-  String question;
-  List<String> options;
-  int correctAnswer;
-  String explanation;
-  String category;
-  String? imagePath;
-
-  StudioQuestion({
-    this.question = '',
-    this.options = const ['', '', '', ''],
-    this.correctAnswer = 0,
-    this.explanation = '',
-    this.category = 'geography',
-    this.imagePath,
-  });
-
-  bool get isValid {
-    return question.isNotEmpty &&
-           options.where((option) => option.isNotEmpty).length >= 2 && // Pelo menos 2 opções preenchidas
-           explanation.isNotEmpty;
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'question': question,
-      'options': options,
-      'correctAnswer': correctAnswer,
-      'explanation': explanation,
-      'category': category,
-      'imagePath': imagePath,
-    };
-  }
-
-  factory StudioQuestion.fromJson(Map<String, dynamic> json) {
-    return StudioQuestion(
-      question: json['question'] ?? '',
-      options: List<String>.from(json['options'] ?? ['', '', '', '']),
-      correctAnswer: json['correctAnswer'] ?? 0,
-      explanation: json['explanation'] ?? '',
-      category: json['category'] ?? 'geography',
-      imagePath: json['imagePath'],
-    );
-  }
 }

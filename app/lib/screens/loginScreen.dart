@@ -59,11 +59,12 @@ class _LoginScreenState extends State<LoginScreen>
       final sessionStore = context.read<SessionStore>();
       final credentials = await sessionStore.getSavedCredentials();
 
-      if (credentials['email'] != null && credentials['password'] != null) {
+      if (credentials['rememberMe'] == true && credentials['email'] != null) {
         setState(() {
           _emailController.text = credentials['email']!;
-          _passwordController.text = credentials['password']!;
           _rememberMe = true;
+          // Não podemos preencher a senha pois ela está criptografada
+          // O usuário precisará digitar a senha novamente
         });
       }
     } catch (e) {
@@ -155,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen>
                       opacity: _fadeAnimation,
                       child: SlideTransition(
                         position: _slideAnimation,
-                        child: Padding(
+                        child: SingleChildScrollView(
                           padding: const EdgeInsets.all(24.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,

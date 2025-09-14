@@ -67,7 +67,7 @@ class ISlideConfigs {
 
   factory ISlideConfigs.fromJson(Map<String, dynamic> json) {
     return ISlideConfigs(
-      slides: (json['slides'] as List)
+      slides: (json['slides'] as List? ?? [])
           .map((s) => ISlideConfig.fromJson(s))
           .toList(),
       totalCorrect: json['totalCorrect'] ?? 0,
@@ -149,13 +149,7 @@ class ISlideData {
     required this.question,
   });
 
-  Color get backgroundColorColor {
-    try {
-      return Color(int.parse(backgroundColor.replaceFirst('#', '0xFF')));
-    } catch (e) {
-      return const Color(0xFF667eea); // Default color
-    }
-  }
+  // Removido getter backgroundColorColor que causava erro de compilação
 
   Map<String, dynamic> toJson() {
     return {
@@ -228,7 +222,7 @@ class ISlideCollectionDocument {
     }
 
     return ISlideCollectionDocument(
-      data: (json['data'] as List).map((d) => ISlideData.fromJson(d)).toList(),
+      data: (json['data'] as List? ?? []).map((d) => ISlideData.fromJson(d)).toList(),
       configs: ISlideConfigs.fromJson(configsData),
       categories: List<String>.from(json['categories'] ?? []),
       title: json['configs']['title'] ?? 'Quiz',

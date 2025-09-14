@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/authModels.dart';
 import '../services/authService.dart';
+import '../services/encryptionService.dart';
 
 class SessionStore extends ChangeNotifier {
   User? _user;
@@ -87,12 +88,18 @@ class SessionStore extends ChangeNotifier {
 
         // Salvar credenciais se lembrar-me estiver ativo
         if (rememberMe && email != null && password != null) {
-          await prefs.setString('savedEmail', email);
-          await prefs.setString('savedPassword', password);
+          // Criptografar email e senha antes de salvar
+          final encryptedEmail = EncryptionService.encryptSensitiveData(email);
+          final encryptedPassword = EncryptionService.encryptPassword(password);
+          
+          await prefs.setString('savedEmail', encryptedEmail);
+          await prefs.setString('savedPassword', encryptedPassword);
+          await prefs.setString('originalEmail', email); // Salvar email original para exibição
         } else if (!rememberMe) {
           // Limpar credenciais se lembrar-me estiver desativado
           await prefs.remove('savedEmail');
           await prefs.remove('savedPassword');
+          await prefs.remove('originalEmail');
         }
 
         print('✅ Sessão salva com sucesso');
@@ -112,8 +119,30 @@ class SessionStore extends ChangeNotifier {
       await prefs.remove('rememberMe');
       await prefs.remove('savedEmail');
       await prefs.remove('savedPassword');
+      await prefs.remove('originalEmail');
     } catch (e) {
       print('Erro ao limpar sessão: $e');
+    }
+  }
+
+  // Limpar dados da sessão (com opção de preservar credenciais)
+  Future<void> _clearSessionData({bool keepCredentials = false}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('user');
+      await prefs.remove('session');
+      await prefs.remove('isLoggedIn');
+      
+      if (!keepCredentials) {
+        // Se não deve manter credenciais, limpar tudo
+        await prefs.remove('rememberMe');
+        await prefs.remove('savedEmail');
+        await prefs.remove('savedPassword');
+        await prefs.remove('originalEmail');
+      }
+      // Se keepCredentials = true, mantém as credenciais para o próximo login
+    } catch (e) {
+      print('Erro ao limpar dados da sessão: $e');
     }
   }
 
@@ -202,12 +231,17 @@ class SessionStore extends ChangeNotifier {
     } catch (e) {
       print('Erro no logout: $e');
     } finally {
+      // Verificar se deve preservar credenciais do "Lembrar-me"
+      final prefs = await SharedPreferences.getInstance();
+      final rememberMe = prefs.getBool('rememberMe') ?? false;
+      
       _user = null;
       _session = null;
       _isLoggedIn = false;
       _error = null;
 
-      await _clearSession();
+      // Limpar apenas dados da sessão, preservar credenciais se "Lembrar-me" estiver ativo
+      await _clearSessionData(keepCredentials: rememberMe);
       _isLoading = false;
       notifyListeners();
 
@@ -301,15 +335,40 @@ class SessionStore extends ChangeNotifier {
   }
 
   // Obter credenciais salvas
-  Future<Map<String, String?>> getSavedCredentials() async {
+  Future<Map<String, dynamic>> getSavedCredentials() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final email = prefs.getString('savedEmail');
-      final password = prefs.getString('savedPassword');
-      return {'email': email, 'password': password};
+      final rememberMe = prefs.getBool('rememberMe') ?? false;
+      
+      if (!rememberMe) {
+        return {'email': null, 'password': null, 'rememberMe': false};
+      }
+      
+      // Retornar email original (não criptografado) para exibição
+      final originalEmail = prefs.getString('originalEmail');
+      final encryptedPassword = prefs.getString('savedPassword');
+      
+      return {
+        'email': originalEmail,
+        'password': encryptedPassword, // Senha criptografada (não pode ser descriptografada)
+        'rememberMe': rememberMe,
+      };
     } catch (e) {
       print('Erro ao obter credenciais salvas: $e');
-      return {'email': null, 'password': null};
+      return {'email': null, 'password': null, 'rememberMe': false};
+    }
+  }
+  
+  // Verificar se tem credenciais salvas
+  Future<bool> hasSavedCredentials() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final rememberMe = prefs.getBool('rememberMe') ?? false;
+      final originalEmail = prefs.getString('originalEmail');
+      return rememberMe && originalEmail != null;
+    } catch (e) {
+      print('Erro ao verificar credenciais salvas: $e');
+      return false;
     }
   }
 }

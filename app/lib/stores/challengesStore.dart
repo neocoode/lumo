@@ -5,6 +5,7 @@ import '../services/challengesService.dart';
 class ChallengesStore extends ChangeNotifier {
   // Game state
   ISlideCollectionDocument? _challengesData;
+  List<ISlideCollectionDocument> _userChallenges = [];
   ISlideConfigs _configs = ISlideConfigs(
     slides: [],
     totalCorrect: 0,
@@ -26,6 +27,7 @@ class ChallengesStore extends ChangeNotifier {
 
   // Getters
   ISlideCollectionDocument? get challengesData => _challengesData;
+  List<ISlideCollectionDocument> get challenges => _userChallenges;
   ISlideConfigs get configs => _configs;
   int get currentQuestion => _currentQuestion;
   bool get gameStarted => _gameStarted;
@@ -45,7 +47,16 @@ class ChallengesStore extends ChangeNotifier {
       _currentQuestion < totalQuestions ? slides[_currentQuestion] : null;
   ISlideQuestion? get currentQuestionObj => currentSlide?.question;
   String? get currentBackgroundImage => currentSlide?.backgroundImage;
-  Color? get currentBackgroundColor => currentSlide?.backgroundColorColor;
+  Color? get currentBackgroundColor {
+    if (currentSlide?.backgroundColor != null) {
+      try {
+        return Color(int.parse(currentSlide!.backgroundColor.replaceFirst('#', '0xFF')));
+      } catch (e) {
+        return const Color(0xFF667eea); // Default color
+      }
+    }
+    return const Color(0xFF667eea); // Default color
+  }
   List<String> get categories => _challengesData?.categories ?? [];
 
   // Initialize game - Load all data from API and keep in memory
@@ -73,6 +84,26 @@ class ChallengesStore extends ChangeNotifier {
       print('❌ Error starting game: $e');
     } finally {
       _loading = false;
+      notifyListeners();
+    }
+  }
+
+  // Load user's challenges
+  Future<void> loadUserChallenges() async {
+    try {
+      _loading = true;
+      _error = null;
+      notifyListeners();
+
+      _userChallenges = await _challengesService.getUserChallenges();
+
+      _loading = false;
+      notifyListeners();
+
+      print('📊 Loaded: ${_userChallenges.length} user challenges');
+    } catch (e) {
+      _loading = false;
+      _error = 'Erro ao carregar challenges do usuário: $e';
       notifyListeners();
     }
   }
@@ -126,6 +157,45 @@ class ChallengesStore extends ChangeNotifier {
       _error = 'Erro ao carregar preview do challenge: $e';
       _isOfflineMode = true;
       print('❌ Error starting challenge preview: $e');
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  // Start preview of studio quiz
+  Future<void> startStudioQuizPreview(String quizId) async {
+    _loading = true;
+    _error = null;
+    _isOfflineMode = false;
+    notifyListeners();
+
+    try {
+      print('🔄 Iniciando preview do quiz do studio: $quizId');
+      
+      // Fetch studio quiz data from API
+      _challengesData = await _challengesService.getStudioQuizPreview(quizId);
+      
+      print('📊 Dados recebidos: ${_challengesData != null ? "SIM" : "NÃO"}');
+      print('📊 Configs recebidos: ${_challengesData?.configs != null ? "SIM" : "NÃO"}');
+      print('📊 Data recebido: ${_challengesData?.data != null ? "SIM" : "NÃO"}');
+      print('📊 Quantidade de slides: ${_challengesData?.data.length ?? 0}');
+      
+      _configs = _challengesData!.configs;
+      _currentQuestion = 0;
+      _gameStarted = true;
+      _gameFinished = false;
+      _usingFallback = false;
+
+      print('✅ Studio quiz preview loaded from API');
+      print('📊 Loaded: ${_challengesData!.data.length} slides for quiz $quizId');
+      print('📊 Game started: $_gameStarted');
+      print('📊 Current question: $_currentQuestion');
+      print('📊 Total questions: $totalQuestions');
+    } catch (e) {
+      _error = 'Erro ao carregar preview do quiz do studio: $e';
+      _isOfflineMode = true;
+      print('❌ Error starting studio quiz preview: $e');
     } finally {
       _loading = false;
       notifyListeners();

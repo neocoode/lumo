@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 import '../config/environment.dart';
 import '../models/studioModels.dart';
+import '../stores/sessionStore.dart';
 
 class StudioApiService {
   final http.Client _client;
@@ -15,12 +18,13 @@ class StudioApiService {
         _baseUrl = baseUrl ?? Environment.apiUrl;
 
   // Salvar quiz
-  Future<bool> saveQuiz(StudioQuiz quiz) async {
+  Future<bool> saveQuiz(StudioQuiz quiz, [BuildContext? context]) async {
     try {
       final response = await _makeRequest(
         'POST',
-        '/api/studio/save',
+        '/studio/save',
         body: quiz.toJson(),
+        context: context,
       );
 
       return response['success'] == true;
@@ -126,6 +130,7 @@ class StudioApiService {
     String method,
     String endpoint, {
     Map<String, dynamic>? body,
+    BuildContext? context,
   }) async {
     final uri = Uri.parse('$_baseUrl$endpoint');
     
@@ -135,27 +140,27 @@ class StudioApiService {
       case 'GET':
         response = await _client.get(
           uri,
-          headers: _getHeaders(),
+          headers: _getHeaders(context),
         );
         break;
       case 'POST':
         response = await _client.post(
           uri,
-          headers: _getHeaders(),
+          headers: _getHeaders(context),
           body: body != null ? json.encode(body) : null,
         );
         break;
       case 'PUT':
         response = await _client.put(
           uri,
-          headers: _getHeaders(),
+          headers: _getHeaders(context),
           body: body != null ? json.encode(body) : null,
         );
         break;
       case 'DELETE':
         response = await _client.delete(
           uri,
-          headers: _getHeaders(),
+          headers: _getHeaders(context),
         );
         break;
       default:
@@ -173,11 +178,26 @@ class StudioApiService {
   }
 
   // Headers padrão
-  Map<String, String> _getHeaders() {
-    return {
+  Map<String, String> _getHeaders([BuildContext? context]) {
+    final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
+
+    // Adicionar token de autenticação se disponível
+    if (context != null) {
+      try {
+        final sessionStore = Provider.of<SessionStore>(context, listen: false);
+        final accessToken = sessionStore.accessToken;
+        if (accessToken != null && accessToken.isNotEmpty) {
+          headers['Authorization'] = 'Bearer $accessToken';
+        }
+      } catch (e) {
+        print('Erro ao obter token de autenticação: $e');
+      }
+    }
+
+    return headers;
   }
 
   // Fechar cliente HTTP
